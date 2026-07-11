@@ -83,6 +83,12 @@ Les champs cellulaires (IMEI, IMEI2, ICCID, IMSI, numéro de téléphone) sont a
 
 `DeviceGlobalInfo` porte un initialiseur écrit à la main (pas seulement celui synthétisé automatiquement) qui donne une valeur par défaut `nil` à chaque champ ajouté après les 8 champs d'origine, pour que les call-sites existants (tests écrits avant l'existence de ces champs) continuent de compiler sans avoir à les passer.
 
+## Layout du popover : deux colonnes, sans scroll
+
+Avec le contenu de 4 cartes, une seule colonne défilante ne tient plus dans un popover de barre de menu sans forcer l'utilisateur à scroller (demande explicite de Vincent : cartes côte à côte "comme MacInside", sans scroll). Le cas `.connected` de `PopoverContentView` dispose les 4 `MetricCard` sur deux colonnes de largeur fixe (318pt) dans un `HStack` — Batterie+Stockage à gauche, Appareil+Cellulaire (conditionnelle) à droite — au lieu d'une `ScrollView` + `VStack` unique. La vue de contenu externe fait `680pt` de large et utilise `.fixedSize(horizontal: false, vertical: true)` pour que sa hauteur suive le contenu réel plutôt qu'une valeur figée.
+
+`StatusMenuController` ne fixe plus manuellement `NSPopover.contentSize` ; à la place, `NSHostingController.sizingOptions = [.preferredContentSize]` (macOS 13+) est utilisé pour que le popover se redimensionne automatiquement à la hauteur naturelle du contenu SwiftUI à chaque changement (ex. apparition/disparition de la carte Cellulaire). Plus robuste que de deviner une hauteur fixe, car la hauteur réelle du contenu varie selon le device (badge Beta, IMEI2 dual-SIM, capacité cellulaire, etc.).
+
 ## Stratégie de polling
 
 - La **présence** (`idevice_id -l`) est sondée toutes les ~2s, que le popover soit ouvert ou non — c'est un appel local léger à `usbmuxd` qui ne nécessite pas de pairing.
@@ -101,7 +107,7 @@ Les champs cellulaires (IMEI, IMEI2, ICCID, IMSI, numéro de téléphone) sont a
 | `iPhoneStatusInfo.swift` | Modèles `Decodable` de plist (`DeviceGlobalInfo` — champs matériel/système/cellulaire étendus, `CarrierBundleInfo`, `DeviceBatteryInfo`, `DeviceDiskUsageInfo`, `DeviceBackupInfo`, `DeviceScreenInfo`, `BatterySmartInfo`/`BatterySmartRegistry`/`BatteryCapacityDetail`/`AdapterDetail`) + le struct combiné `iPhoneStatusInfo` |
 | `DeviceConnectionState.swift` | Enums `DeviceConnectionState` / `TrustIssue` + `StderrClassifier` |
 | `MetricCard.swift` | Composant carte réutilisable (`MetricCard`, `InfoRow`, `StatusDotRow`) porté du design system de MacInside |
-| `PopoverContentView.swift` | Contenu SwiftUI du popover — une branche par cas de `DeviceConnectionState` ; `.connected` affiche 4 `MetricCard` (Batterie, Stockage, Appareil, Cellulaire — cette dernière conditionnelle à `hasCellularInfo`) dans une `ScrollView` |
+| `PopoverContentView.swift` | Contenu SwiftUI du popover — une branche par cas de `DeviceConnectionState` ; `.connected` affiche 4 `MetricCard` côte à côte sur deux colonnes de largeur fixe (Batterie+Stockage, Appareil+Cellulaire — cette dernière conditionnelle à `hasCellularInfo`), sans `ScrollView` |
 
 ## Tests (`iPhoneStatusTests/`)
 

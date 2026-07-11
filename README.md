@@ -84,7 +84,7 @@ iPhoneStatus/
 │       ├── iPhoneStatusInfo.swift         # plist models + combined struct
 │       ├── DeviceConnectionState.swift    # state enum + stderr classifier
 │       ├── MetricCard.swift               # reusable card component (MacInside style)
-│       └── PopoverContentView.swift       # SwiftUI popover UI (4 MetricCards, Cellular conditional)
+│       └── PopoverContentView.swift       # SwiftUI popover UI (4 MetricCards, 2 columns, no scroll)
 └── iPhoneStatusTests/
     ├── PlistParsingTests.swift
     ├── ErrorDetectionTests.swift

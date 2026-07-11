@@ -22,9 +22,12 @@ final class StatusMenuController {
         button.target = self
 
         let popover = NSPopover()
-        popover.contentSize = NSSize(width: 340, height: 520)
         popover.behavior = .transient
-        popover.contentViewController = NSHostingController(rootView: PopoverContentView(viewModel: viewModel))
+        let hostingController = NSHostingController(rootView: PopoverContentView(viewModel: viewModel))
+        // Lets the popover track the SwiftUI content's natural height as cards
+        // change (e.g. the conditional Cellular card) instead of a fixed size.
+        hostingController.sizingOptions = [.preferredContentSize]
+        popover.contentViewController = hostingController
         self.popover = popover
 
         Task { await monitor.start() }

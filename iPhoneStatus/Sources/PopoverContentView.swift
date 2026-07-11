@@ -25,7 +25,8 @@ struct PopoverContentView: View {
             .foregroundStyle(.secondary)
         }
         .padding(16)
-        .frame(width: 340, height: 520)
+        .frame(width: 680)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private var header: some View {
@@ -67,17 +68,20 @@ struct PopoverContentView: View {
             )
 
         case .connected(let info):
-            ScrollView {
+            HStack(alignment: .top, spacing: 12) {
                 VStack(alignment: .leading, spacing: 12) {
                     BatteryCardContent(info: info)
                     StorageCardContent(info: info)
+                }
+                .frame(width: 318)
+                VStack(alignment: .leading, spacing: 12) {
                     DeviceCardContent(info: info)
                     if info.hasCellularInfo {
                         CellularCardContent(info: info)
                     }
                 }
+                .frame(width: 318)
             }
-            .scrollIndicators(.never)
         }
     }
 
