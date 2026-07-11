@@ -71,10 +71,25 @@ struct LibimobiledeviceService: Sendable {
         process.standardError = stderrPipe
 
         try process.run()
+
+        // Drain both pipes concurrently BEFORE waiting for exit. A child that writes
+        // more than the pipe buffer (64KB on macOS — e.g. ideviceinfo's disk_usage
+        // domain, whose NANDInfo blob easily exceeds that) blocks on write() once the
+        // buffer fills; calling waitUntilExit() first would then deadlock forever
+        // since nothing is draining the pipe to unblock the child.
+        let stdoutQueue = DispatchQueue(label: "iPhoneStatus.stdout-drain")
+        var stdoutData = Data()
+        let stdoutDone = DispatchSemaphore(value: 0)
+        stdoutQueue.async {
+            stdoutData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
+            stdoutDone.signal()
+        }
+
+        let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
+        stdoutDone.wait()
+
         process.waitUntilExit()
 
-        let stdoutData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
-        let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
         return ProcessResult(stdout: stdoutData, stderr: stderrData, exitCode: process.terminationStatus)
     }
 }

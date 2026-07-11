@@ -67,11 +67,20 @@ actor DeviceMonitor {
             update(.disconnected)
             return
         }
-        if udid != currentUDID {
-            currentUDID = udid
+        let isNewDevice = udid != currentUDID
+        currentUDID = udid
+        // Keep retrying on every presence tick until connected — not just on a new
+        // UDID — so the app notices as soon as "Trust This Computer" is accepted,
+        // without requiring the popover to be reopened.
+        if isNewDevice || !isConnected(state) {
             await refreshDetails(udid: udid)
             startDetailPollingIfNeeded()
         }
+    }
+
+    private func isConnected(_ state: DeviceConnectionState) -> Bool {
+        if case .connected = state { return true }
+        return false
     }
 
     private func startDetailPollingIfNeeded() {
