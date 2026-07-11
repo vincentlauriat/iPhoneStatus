@@ -10,9 +10,8 @@ struct PopoverContentView: View {
             Divider()
 
             content
-                .frame(maxWidth: .infinity, alignment: .leading)
 
-            Spacer()
+            Spacer(minLength: 0)
 
             Divider()
 
@@ -26,7 +25,7 @@ struct PopoverContentView: View {
             .foregroundStyle(.secondary)
         }
         .padding(16)
-        .frame(width: 300, height: 420)
+        .frame(width: 340, height: 520)
     }
 
     private var header: some View {
@@ -68,7 +67,14 @@ struct PopoverContentView: View {
             )
 
         case .connected(let info):
-            DeviceDetailView(info: info)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    BatteryCardContent(info: info)
+                    StorageCardContent(info: info)
+                    DeviceCardContent(info: info)
+                }
+            }
+            .scrollIndicators(.never)
         }
     }
 
@@ -120,7 +126,79 @@ private struct StatusMessageView<Extra: View>: View {
     }
 }
 
-private struct DeviceDetailView: View {
+private struct BatteryCardContent: View {
+    let info: iPhoneStatusInfo
+
+    private var isCharging: Bool { info.isCharging ?? false }
+
+    var body: some View {
+        MetricCard(title: "Batterie", systemImage: isCharging ? "battery.100.bolt" : batterySymbol) {
+            VStack(alignment: .leading, spacing: 10) {
+                if let level = info.batteryLevel {
+                    HStack {
+                        Text("\(level)%")
+                            .font(.system(.title2, design: .rounded).weight(.semibold))
+                            .monospacedDigit()
+                        Spacer()
+                        Text(isCharging ? "En charge" : "Sur batterie")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    ProgressView(value: Double(level), total: 100)
+                        .tint(isCharging ? .green : .accentColor)
+                }
+
+                if let health = info.batteryHealthPercent {
+                    StatusDotRow(label: "Santé de la batterie", value: "\(health)%", color: healthColor(health))
+                }
+                if let cycles = info.cycleCount {
+                    InfoRow(label: "Cycles de charge", value: "\(cycles) (repère Apple : 1000)")
+                }
+                if isCharging, let watts = info.chargerWattage, watts > 0 {
+                    let description = info.chargerDescription.map { " (\($0))" } ?? ""
+                    InfoRow(label: "Puissance du chargeur", value: "\(watts) W\(description)")
+                }
+                if let voltage = info.voltageVolts {
+                    InfoRow(label: "Tension", value: String(format: "%.2f V", voltage))
+                }
+                if let amperage = info.amperageMilliAmps {
+                    InfoRow(label: "Courant", value: "\(amperage) mA")
+                }
+                if let designCapacity = info.designCapacityMah {
+                    InfoRow(label: "Capacité de conception", value: "\(designCapacity) mAh")
+                }
+                if let serial = info.batterySerial {
+                    InfoRow(label: "N° de série batterie", value: serial)
+                }
+                if let cellID = info.batteryCellID {
+                    InfoRow(label: "ID cellule", value: cellID)
+                }
+            }
+        }
+    }
+
+    private var batterySymbol: String {
+        guard let level = info.batteryLevel else { return "battery.0" }
+        switch level {
+        case ..<15: return "battery.0"
+        case ..<40: return "battery.25"
+        case ..<65: return "battery.50"
+        case ..<90: return "battery.75"
+        default: return "battery.100"
+        }
+    }
+
+    private func healthColor(_ percent: Int) -> Color {
+        switch percent {
+        case 90...: .green
+        case 80..<90: .yellow
+        case 70..<80: .orange
+        default: .red
+        }
+    }
+}
+
+private struct StorageCardContent: View {
     let info: iPhoneStatusInfo
 
     private static let byteFormatter: ByteCountFormatter = {
@@ -130,61 +208,37 @@ private struct DeviceDetailView: View {
     }()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(info.deviceName)
-                .font(.title3.bold())
-
-            InfoRow(label: "Modèle", value: info.productType)
-            InfoRow(label: "iOS", value: "\(info.productVersion) (\(info.buildVersion))")
-            InfoRow(label: "N° de série", value: info.serialNumber)
-            InfoRow(label: "Connexion", value: info.connectionType == .usb ? "USB" : "Wi-Fi")
-
-            if let batteryLevel = info.batteryLevel {
-                HStack {
-                    Image(systemName: (info.isCharging ?? false) ? "battery.100.bolt" : batterySymbol(for: batteryLevel))
-                        .foregroundStyle(batteryLevel < 20 ? .red : .primary)
-                    Text("\(batteryLevel)%")
-                    if info.isCharging ?? false {
-                        Text("(en charge)")
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .font(.subheadline)
-            }
-
-            if let total = info.totalDiskCapacity, let used = info.usedDiskCapacity, total > 0 {
-                VStack(alignment: .leading, spacing: 4) {
+        if let total = info.totalDiskCapacity, let used = info.usedDiskCapacity, total > 0 {
+            MetricCard(title: "Stockage", systemImage: "internaldrive") {
+                VStack(alignment: .leading, spacing: 8) {
                     ProgressView(value: Double(used), total: Double(total))
+                        .tint(.indigo)
                     Text("\(Self.byteFormatter.string(fromByteCount: used)) utilisés sur \(Self.byteFormatter.string(fromByteCount: total))")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
         }
-        .font(.subheadline)
-    }
-
-    private func batterySymbol(for level: Int) -> String {
-        switch level {
-        case ..<15: "battery.0"
-        case ..<40: "battery.25"
-        case ..<65: "battery.50"
-        case ..<90: "battery.75"
-        default: "battery.100"
-        }
     }
 }
 
-private struct InfoRow: View {
-    let label: String
-    let value: String
+private struct DeviceCardContent: View {
+    let info: iPhoneStatusInfo
 
     var body: some View {
-        HStack {
-            Text(label)
-                .foregroundStyle(.secondary)
-            Spacer()
-            Text(value)
+        MetricCard(title: info.deviceName, systemImage: "iphone") {
+            VStack(alignment: .leading, spacing: 8) {
+                InfoRow(label: "Modèle", value: info.productType)
+                InfoRow(label: "iOS", value: "\(info.productVersion) (\(info.buildVersion))")
+                InfoRow(label: "N° de série", value: info.serialNumber)
+                InfoRow(label: "Connexion", value: info.connectionType == .usb ? "USB" : "Wi-Fi")
+                if let wifi = info.wiFiAddress {
+                    InfoRow(label: "Adresse Wi-Fi", value: wifi)
+                }
+                if let bluetooth = info.bluetoothAddress {
+                    InfoRow(label: "Adresse Bluetooth", value: bluetooth)
+                }
+            }
         }
     }
 }

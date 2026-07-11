@@ -48,7 +48,12 @@ struct LibimobiledeviceService: Sendable {
             let diskResult = try? run("ideviceinfo", arguments: ["-u", udid, "-q", "com.apple.disk_usage", "-x"])
             let diskInfo = diskResult.flatMap { try? PropertyListDecoder().decode(DeviceDiskUsageInfo.self, from: $0.stdout) }
 
-            let info = iPhoneStatusInfo.combining(udid: udid, connectionType: .usb, global: global, battery: batteryInfo, disk: diskInfo)
+            // Best-effort enrichment (cycle count, health, charger info, cell ID) — not
+            // guaranteed to succeed on every device/iOS combination, degrades gracefully.
+            let smartBatteryResult = try? run("idevicediagnostics", arguments: ["-u", udid, "ioregentry", "AppleSmartBattery"])
+            let smartBattery = smartBatteryResult.flatMap { try? PropertyListDecoder().decode(BatterySmartInfo.self, from: $0.stdout) }?.ioRegistry
+
+            let info = iPhoneStatusInfo.combining(udid: udid, connectionType: .usb, global: global, battery: batteryInfo, disk: diskInfo, smartBattery: smartBattery)
             return .connected(info)
         } catch is LibimobiledeviceBinaryError {
             return .binariesNotFound

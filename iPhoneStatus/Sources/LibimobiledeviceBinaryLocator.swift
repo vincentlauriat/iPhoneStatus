@@ -14,6 +14,6 @@ enum LibimobiledeviceBinaryLocator {
     }
 
     static var isInstalled: Bool {
-        path(for: "idevice_id") != nil && path(for: "ideviceinfo") != nil
+        path(for: "idevice_id") != nil && path(for: "ideviceinfo") != nil && path(for: "idevicediagnostics") != nil
     }
 }
