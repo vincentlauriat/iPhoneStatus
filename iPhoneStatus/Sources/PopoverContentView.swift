@@ -72,6 +72,9 @@ struct PopoverContentView: View {
                     BatteryCardContent(info: info)
                     StorageCardContent(info: info)
                     DeviceCardContent(info: info)
+                    if info.hasCellularInfo {
+                        CellularCardContent(info: info)
+                    }
                 }
             }
             .scrollIndicators(.never)
@@ -139,6 +142,11 @@ private struct BatteryCardContent: View {
                         Text("\(level)%")
                             .font(.system(.title2, design: .rounded).weight(.semibold))
                             .monospacedDigit()
+                        if info.isFullyCharged == true {
+                            Text("Chargée")
+                                .font(.caption2.bold())
+                                .foregroundStyle(.green)
+                        }
                         Spacer()
                         Text(isCharging ? "En charge" : "Sur batterie")
                             .font(.caption)
@@ -148,11 +156,17 @@ private struct BatteryCardContent: View {
                         .tint(isCharging ? .green : .accentColor)
                 }
 
+                if info.isAtCriticalBatteryLevel == true {
+                    StatusDotRow(label: "Niveau critique", value: "⚠️", color: .red)
+                }
                 if let health = info.batteryHealthPercent {
                     StatusDotRow(label: "Santé de la batterie", value: "\(health)%", color: healthColor(health))
                 }
                 if let cycles = info.cycleCount {
                     InfoRow(label: "Cycles de charge", value: "\(cycles) (repère Apple : 1000)")
+                }
+                if let minutes = info.avgTimeToEmptyMinutes, minutes > 0, !isCharging {
+                    InfoRow(label: "Autonomie restante estimée", value: formatMinutes(minutes))
                 }
                 if isCharging, let watts = info.chargerWattage, watts > 0 {
                     let description = info.chargerDescription.map { " (\($0))" } ?? ""
@@ -166,6 +180,12 @@ private struct BatteryCardContent: View {
                 }
                 if let designCapacity = info.designCapacityMah {
                     InfoRow(label: "Capacité de conception", value: "\(designCapacity) mAh")
+                }
+                if let nominalCapacity = info.nominalChargeCapacityMah {
+                    InfoRow(label: "Capacité nominale", value: "\(nominalCapacity) mAh")
+                }
+                if let fullChargeCapacity = info.fullChargeCapacityMah {
+                    InfoRow(label: "Capacité à pleine charge", value: "\(fullChargeCapacity) mAh")
                 }
                 if let serial = info.batterySerial {
                     InfoRow(label: "N° de série batterie", value: serial)
@@ -196,6 +216,15 @@ private struct BatteryCardContent: View {
         default: .red
         }
     }
+
+    private func formatMinutes(_ minutes: Int) -> String {
+        let hours = minutes / 60
+        let remainder = minutes % 60
+        if hours > 0 {
+            return "\(hours) h \(remainder) min"
+        }
+        return "\(remainder) min"
+    }
 }
 
 private struct StorageCardContent: View {
@@ -216,6 +245,12 @@ private struct StorageCardContent: View {
                     Text("\(Self.byteFormatter.string(fromByteCount: used)) utilisés sur \(Self.byteFormatter.string(fromByteCount: total))")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                    if let dataCapacity = info.totalDataCapacity {
+                        InfoRow(label: "Capacité partition data", value: Self.byteFormatter.string(fromByteCount: dataCapacity))
+                    }
+                    if let systemCapacity = info.totalSystemCapacity {
+                        InfoRow(label: "Capacité partition système", value: Self.byteFormatter.string(fromByteCount: systemCapacity))
+                    }
                 }
             }
         }
@@ -229,14 +264,86 @@ private struct DeviceCardContent: View {
         MetricCard(title: info.deviceName, systemImage: "iphone") {
             VStack(alignment: .leading, spacing: 8) {
                 InfoRow(label: "Modèle", value: info.productType)
-                InfoRow(label: "iOS", value: "\(info.productVersion) (\(info.buildVersion))")
+                if let hardwareModel = info.hardwareModel {
+                    InfoRow(label: "Modèle interne", value: hardwareModel)
+                }
+                if let modelNumber = info.modelNumber {
+                    InfoRow(label: "Référence", value: modelNumber)
+                }
+                if let cpuArchitecture = info.cpuArchitecture {
+                    InfoRow(label: "Architecture CPU", value: cpuArchitecture)
+                }
+                HStack(spacing: 4) {
+                    Text("iOS")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    if info.isBetaRelease {
+                        Text("Beta")
+                            .font(.caption2.bold())
+                            .foregroundStyle(.orange)
+                    }
+                    Text(info.humanReadableProductVersion.map { "\($0) (\(info.buildVersion))" } ?? "\(info.productVersion) (\(info.buildVersion))")
+                        .font(.caption.monospacedDigit())
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
                 InfoRow(label: "N° de série", value: info.serialNumber)
+                if let activationState = info.activationState {
+                    InfoRow(label: "Activation", value: activationState)
+                }
+                if let timeZone = info.timeZone {
+                    InfoRow(label: "Fuseau horaire", value: timeZone)
+                }
+                if let width = info.screenWidth, let height = info.screenHeight {
+                    let scale = info.screenScaleFactor.map { "@\(Int($0))x" } ?? ""
+                    InfoRow(label: "Résolution écran", value: "\(width)×\(height)\(scale)")
+                }
                 InfoRow(label: "Connexion", value: info.connectionType == .usb ? "USB" : "Wi-Fi")
                 if let wifi = info.wiFiAddress {
                     InfoRow(label: "Adresse Wi-Fi", value: wifi)
                 }
                 if let bluetooth = info.bluetoothAddress {
                     InfoRow(label: "Adresse Bluetooth", value: bluetooth)
+                }
+                if let cloudBackupEnabled = info.cloudBackupEnabled {
+                    let encryption = info.backupWillEncrypt == true ? ", chiffrée" : ""
+                    InfoRow(label: "Sauvegarde iCloud", value: cloudBackupEnabled ? "Activée\(encryption)" : "Désactivée")
+                }
+            }
+        }
+    }
+}
+
+private struct CellularCardContent: View {
+    let info: iPhoneStatusInfo
+
+    var body: some View {
+        MetricCard(title: "Cellulaire", systemImage: "antenna.radiowaves.left.and.right") {
+            VStack(alignment: .leading, spacing: 8) {
+                if let carrierName = info.carrierName {
+                    InfoRow(label: "Opérateur", value: carrierName)
+                }
+                if let simStatus = info.simStatus {
+                    InfoRow(label: "Statut SIM", value: simStatus)
+                }
+                if let simIsEmbedded = info.simIsEmbedded {
+                    InfoRow(label: "Type de SIM", value: simIsEmbedded ? "eSIM" : "SIM physique")
+                }
+                if let imei = info.imei {
+                    InfoRow(label: "IMEI", value: imei)
+                }
+                if let imei2 = info.imei2 {
+                    InfoRow(label: "IMEI 2", value: imei2)
+                }
+                if let iccid = info.iccid {
+                    InfoRow(label: "ICCID", value: iccid)
+                }
+                if let imsi = info.imsi {
+                    InfoRow(label: "IMSI", value: imsi)
+                }
+                if let phoneNumber = info.phoneNumber {
+                    InfoRow(label: "Numéro de téléphone", value: phoneNumber)
                 }
             }
         }

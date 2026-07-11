@@ -41,6 +41,12 @@ final class BatterySmartInfoParsingTests: XCTestCase {
                 <string>F8YTESTBATTERY001</string>
                 <key>Voltage</key>
                 <integer>3998</integer>
+                <key>AvgTimeToEmpty</key>
+                <integer>312</integer>
+                <key>FullyCharged</key>
+                <false/>
+                <key>AtCriticalLevel</key>
+                <false/>
             </dict>
         </dict>
         </plist>
@@ -58,6 +64,11 @@ final class BatterySmartInfoParsingTests: XCTestCase {
         XCTAssertEqual(registry.serial, "F8YTESTBATTERY001")
         XCTAssertEqual(registry.adapterDetails?.watts, 15)
         XCTAssertEqual(registry.adapterDetails?.description, "pd charger")
+        XCTAssertEqual(registry.avgTimeToEmpty, 312)
+        XCTAssertEqual(registry.fullyCharged, false)
+        XCTAssertEqual(registry.atCriticalLevel, false)
+        XCTAssertEqual(registry.batteryData?.nominalChargeCapacity, 3103)
+        XCTAssertEqual(registry.batteryData?.fullChargeCapacity, 3233)
     }
 
     func testHealthPercentMatchesIOSSettingsFormula() throws {
@@ -99,6 +110,11 @@ final class BatterySmartInfoParsingTests: XCTestCase {
         XCTAssertEqual(combined.chargerDescription, "pd charger")
         XCTAssertEqual(combined.batterySerial, "F8YTESTBATTERY001")
         XCTAssertEqual(combined.batteryCellID, "TESTCELLIDVALUE1")
+        XCTAssertEqual(combined.nominalChargeCapacityMah, 3103)
+        XCTAssertEqual(combined.fullChargeCapacityMah, 3233)
+        XCTAssertEqual(combined.avgTimeToEmptyMinutes, 312)
+        XCTAssertEqual(combined.isFullyCharged, false)
+        XCTAssertEqual(combined.isAtCriticalBatteryLevel, false)
     }
 
     func testMissingSmartBatteryLeavesEnrichedFieldsNil() {

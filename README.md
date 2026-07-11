@@ -3,9 +3,9 @@
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
 ![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-lightgrey)
 ![Swift](https://img.shields.io/badge/swift-5.9-orange)
-![Tests](https://img.shields.io/badge/tests-17%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-29%20passing-brightgreen)
 
-A lightweight macOS menu bar app (AppKit) that shows the live status of an iPhone connected over USB — battery health, storage, iOS version, connection state and hardware info — via [libimobiledevice](https://libimobiledevice.org). No app needed on the iPhone side, just the standard "Trust This Computer" prompt. UI design (card style, typography, color rules) matches the MacInside design system.
+A lightweight macOS menu bar app (AppKit) that shows a comprehensive live status of an iPhone connected over USB — battery health, storage, iOS version, hardware, cellular and connection info — via [libimobiledevice](https://libimobiledevice.org). No app needed on the iPhone side, just the standard "Trust This Computer" prompt. UI design (card style, typography, color rules) matches the MacInside design system.
 
 ---
 
@@ -13,9 +13,10 @@ A lightweight macOS menu bar app (AppKit) that shows the live status of an iPhon
 
 | Feature | Description |
 |---|---|
-| Battery | Level (%), charging state, health (%), cycle count, voltage, current, charger wattage/type, battery serial, cell ID |
-| Storage | Total / used capacity with a progress bar |
-| Device info | Name, model identifier, iOS version + build, serial number, Wi-Fi/Bluetooth addresses |
+| Battery | Level (%), charging state, health (%), cycle count, voltage, current, charger wattage/type, design/nominal/full-charge capacity, estimated time remaining, fully-charged/critical-level flags, battery serial, cell ID |
+| Storage | Total / used capacity with a progress bar, plus data and system partition sizes |
+| Device info | Name, model identifier + hardware model + model number, CPU architecture, iOS version + build (with Beta badge), serial number, activation state, time zone, screen resolution, Wi-Fi/Bluetooth addresses, iCloud backup status |
+| Cellular *(shown only if applicable)* | Carrier name, SIM status, eSIM/physical SIM, IMEI, IMEI2, ICCID, IMSI, phone number — shown unmasked (personal-device tool) |
 | Connection state | USB presence detection, color-coded menu bar icon |
 | Trust flow | Dedicated UI state while waiting for "Trust This Computer" on the iPhone (also handles denied trust / locked device) |
 | Missing dependency | Guides you to `brew install libimobiledevice` if it isn't installed yet |
@@ -39,7 +40,7 @@ A lightweight macOS menu bar app (AppKit) that shows the live status of an iPhon
 | Popover content | SwiftUI (`NSHostingController`) |
 | Device data | libimobiledevice CLI (`idevice_id`, `ideviceinfo`, `idevicediagnostics`) via `Process` |
 | Concurrency | Swift Concurrency (`actor`, `AsyncStream`), `SWIFT_STRICT_CONCURRENCY: targeted` |
-| Tests | XCTest (`iPhoneStatusTests`, 17 unit tests) |
+| Tests | XCTest (`iPhoneStatusTests`, 29 unit tests) |
 | Project generation | [XcodeGen](https://github.com/yonaskolb/XcodeGen) |
 
 See `ARCHITECTURE.md` (French, source-mirrored) / `ARCHITECTURE_EN.md` (English, source of truth) for the full design rationale.
@@ -83,7 +84,7 @@ iPhoneStatus/
 │       ├── iPhoneStatusInfo.swift         # plist models + combined struct
 │       ├── DeviceConnectionState.swift    # state enum + stderr classifier
 │       ├── MetricCard.swift               # reusable card component (MacInside style)
-│       └── PopoverContentView.swift       # SwiftUI popover UI (3 MetricCards)
+│       └── PopoverContentView.swift       # SwiftUI popover UI (4 MetricCards, Cellular conditional)
 └── iPhoneStatusTests/
     ├── PlistParsingTests.swift
     ├── ErrorDetectionTests.swift
@@ -100,6 +101,7 @@ iPhoneStatus/
 - [x] Unit test suite (plist parsing, stderr classification)
 - [x] Enriched battery diagnostics (health %, cycle count, voltage, current, charger, cell ID) via `idevicediagnostics`
 - [x] MacInside-style card UI (`MetricCard` component)
+- [x] Comprehensive status: hardware/system/cellular fields, iCloud backup status, screen resolution, extended battery/storage detail, conditional Cellular card
 - [ ] Settings (refresh interval, Launch at Login via `SMAppService`)
 - [ ] Sparkle auto-update
 - [ ] Signed/notarized DMG release pipeline

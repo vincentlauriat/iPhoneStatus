@@ -26,9 +26,13 @@
 │                                                              │
 │  LibimobiledeviceService (Sendable, Process wrapping)        │
 │    ├─ idevice_id -l                                          │
-│    ├─ ideviceinfo -u <udid> -x                                │
+│    ├─ ideviceinfo -u <udid> -x            (hardware/system/  │
+│    │     cellular fields decoded from this global dump too)  │
 │    ├─ ideviceinfo -u <udid> -q com.apple.mobile.battery -x    │
 │    ├─ ideviceinfo -u <udid> -q com.apple.disk_usage -x        │
+│    ├─ ideviceinfo -u <udid> -q com.apple.mobile.backup -x     │
+│    ├─ ideviceinfo -u <udid> -q com.apple.mobile.iTunes -x     │
+│    │     (screen resolution only, best-effort)                │
 │    └─ idevicediagnostics -u <udid> ioregentry                 │
 │         AppleSmartBattery  (best-effort enrichment)           │
 │                                                              │
@@ -71,6 +75,14 @@ This generic fallback is deliberate: the exact wording of `lockdownd`'s error me
 
 The battery health percentage shown in the UI is computed as `round(NominalChargeCapacity / DesignCapacity * 100)` (`BatteryCapacityDetail.healthPercent` in `iPhoneStatusInfo.swift`) — this reproduces the exact percentage iOS Settings shows under Battery Health, verified against a real device. Two fields are deliberately **not** shown: a guessed battery manufacturer name (no verified serial-prefix-to-manufacturer mapping was found) and temperature (not exposed by this method — shown as a placeholder even by the third-party tool used as a reference during development).
 
+## Comprehensive status ("très très complet")
+
+Beyond battery, the popover surfaces close to 20 additional fields, most decoded from the already-fetched global `ideviceinfo -u <udid> -x` dump (`DeviceGlobalInfo` in `iPhoneStatusInfo.swift`) — no extra process call needed for those: hardware (`HardwareModel`, `ModelNumber`, `CPUArchitecture`), system (`HumanReadableProductVersionString` with a Beta badge when `ReleaseType == "Beta"`, `ActivationState`, `TimeZone`), and cellular (`TelephonyCapability`, `SIM1IsEmbedded`, `SIMStatus`, IMEI/IMEI2, ICCID, IMSI, phone number, carrier name derived from `CarrierBundleInfoArray`). Two more optional domain calls were added following the same graceful-degradation `try?` pattern: `com.apple.mobile.backup` (iCloud backup status) and `com.apple.mobile.iTunes` (screen resolution only — decoded into a narrow `DeviceScreenInfo` struct that ignores the ~2400 lines of FairPlay certificate blobs the rest of that domain returns).
+
+Cellular fields (IMEI, IMEI2, ICCID, IMSI, phone number) are shown **unmasked** — a deliberate choice Vincent made explicitly when asked, since this is a personal tool for his own device. Do not reintroduce masking without him asking for it again.
+
+`DeviceGlobalInfo` carries a hand-written initializer (not just the synthesized memberwise one) giving every field added after the original 8 a `nil` default, so pre-existing call sites (tests written before these fields existed) keep compiling without passing them.
+
 ## Polling strategy
 
 - **Presence** (`idevice_id -l`) is polled every ~2s regardless of whether the popover is open — it's a cheap local call to `usbmuxd` and doesn't require pairing.
@@ -86,20 +98,20 @@ The battery health percentage shown in the UI is computed as `round(NominalCharg
 | `DeviceMonitor.swift` | `actor`; presence/detail polling loops; publishes `AsyncStream<DeviceConnectionState>` |
 | `LibimobiledeviceService.swift` | Wraps `Process` calls to the CLI binaries; classifies failures |
 | `LibimobiledeviceBinaryLocator.swift` | Locates `idevice_id`/`ideviceinfo` under `/opt/homebrew/bin` or `/usr/local/bin` |
-| `iPhoneStatusInfo.swift` | `Decodable` plist models (`DeviceGlobalInfo`, `DeviceBatteryInfo`, `DeviceDiskUsageInfo`, `BatterySmartInfo`/`BatterySmartRegistry`/`BatteryCapacityDetail`/`AdapterDetail`) + the combined `iPhoneStatusInfo` struct |
+| `iPhoneStatusInfo.swift` | `Decodable` plist models (`DeviceGlobalInfo` — extended hardware/system/cellular fields, `CarrierBundleInfo`, `DeviceBatteryInfo`, `DeviceDiskUsageInfo`, `DeviceBackupInfo`, `DeviceScreenInfo`, `BatterySmartInfo`/`BatterySmartRegistry`/`BatteryCapacityDetail`/`AdapterDetail`) + the combined `iPhoneStatusInfo` struct |
 | `DeviceConnectionState.swift` | `DeviceConnectionState` / `TrustIssue` enums + `StderrClassifier` |
 | `MetricCard.swift` | Reusable card component (`MetricCard`, `InfoRow`, `StatusDotRow`) ported from MacInside's design system |
-| `PopoverContentView.swift` | SwiftUI popover content — one branch per `DeviceConnectionState` case; `.connected` renders 3 `MetricCard`s (Battery, Storage, Device) in a `ScrollView` |
+| `PopoverContentView.swift` | SwiftUI popover content — one branch per `DeviceConnectionState` case; `.connected` renders 4 `MetricCard`s (Battery, Storage, Device, Cellular — the last one conditional on `hasCellularInfo`) in a `ScrollView` |
 
 ## Tests (`iPhoneStatusTests/`)
 
 | File | Role |
 |---|---|
-| `PlistParsingTests.swift` | Decodes fixture plist XML into the `Decodable` models and checks `iPhoneStatusInfo.combining(...)` (including the `usedDiskCapacity` computation and default fallbacks) |
+| `PlistParsingTests.swift` | Decodes fixture plist XML into the `Decodable` models (including the extended `DeviceGlobalInfo` fields, `DeviceBackupInfo`, `DeviceScreenInfo`) and checks `iPhoneStatusInfo.combining(...)` (including the `usedDiskCapacity` computation, carrier-name derivation, and default fallbacks) |
 | `ErrorDetectionTests.swift` | Feeds sample `stderr` strings to `StderrClassifier.classify(_:)` and checks the resulting `TrustIssue` |
-| `BatterySmartInfoParsingTests.swift` | Decodes a fixture `ioregentry AppleSmartBattery` plist, checks the health-percent formula, the `ManufacturerData` → cell ID decoding, and graceful degradation when the enrichment call is unavailable |
+| `BatterySmartInfoParsingTests.swift` | Decodes a fixture `ioregentry AppleSmartBattery` plist, checks the health-percent formula, the `ManufacturerData` → cell ID decoding, the extended fields (`AvgTimeToEmpty`, `FullyCharged`, `AtCriticalLevel`, `NominalChargeCapacity`), and graceful degradation when the enrichment call is unavailable |
 
-Both are pure-function tests — no `Process` execution, no physical device required.
+All 29 are pure-function tests — no `Process` execution, no physical device required.
 
 ## Out of scope for the MVP
 

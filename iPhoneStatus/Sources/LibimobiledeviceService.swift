@@ -53,7 +53,24 @@ struct LibimobiledeviceService: Sendable {
             let smartBatteryResult = try? run("idevicediagnostics", arguments: ["-u", udid, "ioregentry", "AppleSmartBattery"])
             let smartBattery = smartBatteryResult.flatMap { try? PropertyListDecoder().decode(BatterySmartInfo.self, from: $0.stdout) }?.ioRegistry
 
-            let info = iPhoneStatusInfo.combining(udid: udid, connectionType: .usb, global: global, battery: batteryInfo, disk: diskInfo, smartBattery: smartBattery)
+            let backupResult = try? run("ideviceinfo", arguments: ["-u", udid, "-q", "com.apple.mobile.backup", "-x"])
+            let backupInfo = backupResult.flatMap { try? PropertyListDecoder().decode(DeviceBackupInfo.self, from: $0.stdout) }
+
+            // com.apple.mobile.iTunes returns ~2400 lines (mostly FairPlay certificate
+            // blobs) — decoding into this narrow struct just ignores everything else.
+            let screenResult = try? run("ideviceinfo", arguments: ["-u", udid, "-q", "com.apple.mobile.iTunes", "-x"])
+            let screenInfo = screenResult.flatMap { try? PropertyListDecoder().decode(DeviceScreenInfo.self, from: $0.stdout) }
+
+            let info = iPhoneStatusInfo.combining(
+                udid: udid,
+                connectionType: .usb,
+                global: global,
+                battery: batteryInfo,
+                disk: diskInfo,
+                smartBattery: smartBattery,
+                backup: backupInfo,
+                screen: screenInfo
+            )
             return .connected(info)
         } catch is LibimobiledeviceBinaryError {
             return .binariesNotFound
