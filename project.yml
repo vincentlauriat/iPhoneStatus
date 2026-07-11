@@ -1,0 +1,70 @@
+name: iPhoneStatus
+options:
+  bundleIdPrefix: com.vincent
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+  groupSortPosition: top
+  xcodeVersion: "16.0"
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    DEVELOPMENT_TEAM: "KFLACS69T9"
+    ENABLE_HARDENED_RUNTIME: YES
+    ENABLE_APP_SANDBOX: NO
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    SWIFT_STRICT_CONCURRENCY: targeted
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+
+targets:
+  iPhoneStatus:
+    type: application
+    platform: macOS
+    sources:
+      - path: iPhoneStatus/Sources
+      - path: iPhoneStatus/Resources/Assets.xcassets
+        buildPhase: resources
+    info:
+      path: iPhoneStatus/Info.plist
+      properties:
+        CFBundleDisplayName: iPhoneStatus
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        LSMinimumSystemVersion: "14.0"
+        LSUIElement: true
+        NSHighResolutionCapable: true
+        NSPrincipalClass: NSApplication
+        NSSupportsAutomaticGraphicsSwitching: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.vincent.iPhoneStatus
+        PRODUCT_NAME: iPhoneStatus
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        COMBINE_HIDPI_IMAGES: YES
+        CODE_SIGN_IDENTITY: "Developer ID Application"
+        CODE_SIGN_STYLE: Manual
+    scheme:
+      testTargets:
+        - iPhoneStatusTests
+
+  iPhoneStatusTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: iPhoneStatusTests
+    dependencies:
+      - target: iPhoneStatus
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.vincent.iPhoneStatusTests
+        GENERATE_INFOPLIST_FILE: YES
+        # Match the host's Team ID — the hardened-runtime host enforces library
+        # validation and rejects a differently-signed (adhoc) test bundle.
+        CODE_SIGN_IDENTITY: "Developer ID Application"
+        CODE_SIGN_STYLE: Manual
+        DEVELOPMENT_TEAM: "KFLACS69T9"
