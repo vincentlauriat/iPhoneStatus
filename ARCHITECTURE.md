@@ -28,7 +28,9 @@
 │    ├─ idevice_id -l                                          │
 │    ├─ ideviceinfo -u <udid> -x                                │
 │    ├─ ideviceinfo -u <udid> -q com.apple.mobile.battery -x    │
-│    └─ ideviceinfo -u <udid> -q com.apple.disk_usage -x        │
+│    ├─ ideviceinfo -u <udid> -q com.apple.disk_usage -x        │
+│    └─ idevicediagnostics -u <udid> ioregentry                 │
+│         AppleSmartBattery  (enrichissement best-effort)       │
 │                                                              │
 │  CLI libimobiledevice (Homebrew : /opt/homebrew/bin)         │
 │    └─ usbmuxd (intégré à macOS) ──USB/pairing── iPhone       │
@@ -42,8 +44,9 @@
 | Langage | Swift 5.9+ | Natif macOS |
 | Coquille UI | AppKit (`NSStatusItem`, `NSPopover`) | Exigence explicite — app menu bar AppKit, pas `MenuBarExtra` SwiftUI |
 | Contenu du popover | SwiftUI, hébergé via `NSHostingController` | Itération plus rapide sur les 4 états d'UI tout en gardant la coquille AppKit |
-| Source des données | CLI libimobiledevice (`idevice_id`, `ideviceinfo`) via `Process` | Outil open-source mature et largement utilisé (formule Homebrew `libimobiledevice`, officielle/bottled) ; évite de maintenir une couche d'interop C pour un MVP maintenu en solo |
-| Format de données | plist XML (option `-x`) décodé avec `PropertyListDecoder` | Sortie stable et typée de `ideviceinfo` |
+| Source des données | CLI libimobiledevice (`idevice_id`, `ideviceinfo`, `idevicediagnostics`) via `Process` | Outil open-source mature et largement utilisé (formule Homebrew `libimobiledevice`, officielle/bottled) ; évite de maintenir une couche d'interop C pour un MVP maintenu en solo |
+| Format de données | plist XML (option `-x`) décodé avec `PropertyListDecoder` | Sortie stable et typée de `ideviceinfo`/`idevicediagnostics` |
+| Composant carte UI | `MetricCard` porté fidèlement | Aligné sur le design system de MacInside, une autre app menu bar de Vincent |
 | Concurrence | Swift Concurrency (`actor`, `AsyncStream`), `SWIFT_STRICT_CONCURRENCY: targeted` | Aligné sur la convention WifiManager/NetCheck (patron `ConnectivityMonitor`) |
 | Tests | XCTest (`iPhoneStatusTests`) | Fonctions pures (parsing plist, classification stderr) — aucun device physique requis |
 | Génération de projet | [XcodeGen](https://github.com/yonaskolb/XcodeGen) | Aligné sur tous les projets sœurs |
@@ -62,6 +65,12 @@ Lier directement les en-têtes C de `libimobiledevice`/`libplist` éviterait le 
 
 Ce repli générique est délibéré : le libellé exact des messages d'erreur de `lockdownd` n'est pas garanti stable d'une version de libimobiledevice à l'autre, donc un message non reconnu se dégrade gracieusement vers le cas le plus courant plutôt que d'afficher une erreur brute.
 
+## Diagnostics batterie enrichis
+
+`idevicediagnostics ioregentry AppleSmartBattery` renvoie un plist bien plus riche que le domaine lockdown `com.apple.mobile.battery` : cycles de charge, capacités détaillées (design/nominale/pleine charge), tension, courant, puissance et type du chargeur, numéro de série batterie, et un blob `ManufacturerData` qui se décode en identifiant de cellule. Cet appel est traité comme un **enrichissement optionnel** (`try?`, même pattern que les appels des domaines batterie/disque) — le pourcentage de batterie de base et l'état de charge proviennent toujours du domaine `com.apple.mobile.battery` garanti, donc un échec ici se traduit juste par moins de lignes de détail, pas par une section batterie cassée.
+
+Le pourcentage de santé batterie affiché dans l'UI est calculé par `round(NominalChargeCapacity / DesignCapacity * 100)` (`BatteryCapacityDetail.healthPercent` dans `iPhoneStatusInfo.swift`) — ce qui reproduit exactement le pourcentage affiché dans Réglages iOS sous Santé de la batterie, vérifié sur un vrai device. Deux champs sont délibérément **non affichés** : un nom de fabricant batterie deviné (aucun mapping vérifié préfixe de série→fabricant trouvé) et la température (non exposée par cette méthode — affichée comme un placeholder même par l'outil tiers utilisé comme référence pendant le développement).
+
 ## Stratégie de polling
 
 - La **présence** (`idevice_id -l`) est sondée toutes les ~2s, que le popover soit ouvert ou non — c'est un appel local léger à `usbmuxd` qui ne nécessite pas de pairing.
@@ -77,15 +86,17 @@ Ce repli générique est délibéré : le libellé exact des messages d'erreur d
 | `DeviceMonitor.swift` | `actor` ; boucles de polling présence/détails ; publie un `AsyncStream<DeviceConnectionState>` |
 | `LibimobiledeviceService.swift` | Encapsule les appels `Process` vers les binaires CLI ; classifie les échecs |
 | `LibimobiledeviceBinaryLocator.swift` | Localise `idevice_id`/`ideviceinfo` sous `/opt/homebrew/bin` ou `/usr/local/bin` |
-| `iPhoneStatusInfo.swift` | Modèles `Decodable` de plist (`DeviceGlobalInfo`, `DeviceBatteryInfo`, `DeviceDiskUsageInfo`) + le struct combiné `iPhoneStatusInfo` |
+| `iPhoneStatusInfo.swift` | Modèles `Decodable` de plist (`DeviceGlobalInfo`, `DeviceBatteryInfo`, `DeviceDiskUsageInfo`, `BatterySmartInfo`/`BatterySmartRegistry`/`BatteryCapacityDetail`/`AdapterDetail`) + le struct combiné `iPhoneStatusInfo` |
 | `DeviceConnectionState.swift` | Enums `DeviceConnectionState` / `TrustIssue` + `StderrClassifier` |
-| `PopoverContentView.swift` | Contenu SwiftUI du popover, une branche par cas de `DeviceConnectionState` |
+| `MetricCard.swift` | Composant carte réutilisable (`MetricCard`, `InfoRow`, `StatusDotRow`) porté du design system de MacInside |
+| `PopoverContentView.swift` | Contenu SwiftUI du popover — une branche par cas de `DeviceConnectionState` ; `.connected` affiche 3 `MetricCard` (Batterie, Stockage, Appareil) dans une `ScrollView` |
 
 ## Tests (`iPhoneStatusTests/`)
 
 | Fichier | Rôle |
 |---|---|
 | `PlistParsingTests.swift` | Décode des plists XML de fixture dans les modèles `Decodable` et vérifie `iPhoneStatusInfo.combining(...)` (y compris le calcul `usedDiskCapacity` et les valeurs de repli par défaut) |
+| `BatterySmartInfoParsingTests.swift` | Décode une fixture de plist `ioregentry AppleSmartBattery`, vérifie la formule de santé, le décodage `ManufacturerData` → ID cellule, et la dégradation gracieuse si l'appel d'enrichissement échoue |
 | `ErrorDetectionTests.swift` | Envoie des chaînes `stderr` d'exemple à `StderrClassifier.classify(_:)` et vérifie le `TrustIssue` obtenu |
 
 Les deux sont des tests de fonctions pures — aucune exécution de `Process`, aucun device physique requis.

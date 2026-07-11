@@ -3,9 +3,9 @@
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
 ![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-lightgrey)
 ![Swift](https://img.shields.io/badge/swift-5.9-orange)
-![Tests](https://img.shields.io/badge/tests-12%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-17%20passing-brightgreen)
 
-A lightweight macOS menu bar app (AppKit) that shows the live status of an iPhone connected over USB — battery, storage, iOS version, connection state and hardware info — via [libimobiledevice](https://libimobiledevice.org). No app needed on the iPhone side, just the standard "Trust This Computer" prompt.
+A lightweight macOS menu bar app (AppKit) that shows the live status of an iPhone connected over USB — battery health, storage, iOS version, connection state and hardware info — via [libimobiledevice](https://libimobiledevice.org). No app needed on the iPhone side, just the standard "Trust This Computer" prompt. UI design (card style, typography, color rules) matches the MacInside design system.
 
 ---
 
@@ -13,9 +13,9 @@ A lightweight macOS menu bar app (AppKit) that shows the live status of an iPhon
 
 | Feature | Description |
 |---|---|
-| Battery | Level (%) and charging state |
+| Battery | Level (%), charging state, health (%), cycle count, voltage, current, charger wattage/type, battery serial, cell ID |
 | Storage | Total / used capacity with a progress bar |
-| Device info | Name, model identifier, iOS version + build, serial number |
+| Device info | Name, model identifier, iOS version + build, serial number, Wi-Fi/Bluetooth addresses |
 | Connection state | USB presence detection, color-coded menu bar icon |
 | Trust flow | Dedicated UI state while waiting for "Trust This Computer" on the iPhone (also handles denied trust / locked device) |
 | Missing dependency | Guides you to `brew install libimobiledevice` if it isn't installed yet |
@@ -37,9 +37,9 @@ A lightweight macOS menu bar app (AppKit) that shows the live status of an iPhon
 |---|---|
 | UI shell | AppKit (`NSStatusItem`, `NSPopover`) |
 | Popover content | SwiftUI (`NSHostingController`) |
-| Device data | libimobiledevice CLI (`idevice_id`, `ideviceinfo`) via `Process` |
+| Device data | libimobiledevice CLI (`idevice_id`, `ideviceinfo`, `idevicediagnostics`) via `Process` |
 | Concurrency | Swift Concurrency (`actor`, `AsyncStream`), `SWIFT_STRICT_CONCURRENCY: targeted` |
-| Tests | XCTest (`iPhoneStatusTests`, 12 unit tests) |
+| Tests | XCTest (`iPhoneStatusTests`, 17 unit tests) |
 | Project generation | [XcodeGen](https://github.com/yonaskolb/XcodeGen) |
 
 See `ARCHITECTURE.md` (French, source-mirrored) / `ARCHITECTURE_EN.md` (English, source of truth) for the full design rationale.
@@ -82,10 +82,12 @@ iPhoneStatus/
 │       ├── LibimobiledeviceBinaryLocator.swift
 │       ├── iPhoneStatusInfo.swift         # plist models + combined struct
 │       ├── DeviceConnectionState.swift    # state enum + stderr classifier
-│       └── PopoverContentView.swift       # SwiftUI popover UI
+│       ├── MetricCard.swift               # reusable card component (MacInside style)
+│       └── PopoverContentView.swift       # SwiftUI popover UI (3 MetricCards)
 └── iPhoneStatusTests/
     ├── PlistParsingTests.swift
-    └── ErrorDetectionTests.swift
+    ├── ErrorDetectionTests.swift
+    └── BatterySmartInfoParsingTests.swift
 ```
 
 ---
@@ -96,10 +98,13 @@ iPhoneStatus/
 - [x] Battery, storage, iOS version, serial number display
 - [x] Missing-dependency guidance (`brew install libimobiledevice`)
 - [x] Unit test suite (plist parsing, stderr classification)
+- [x] Enriched battery diagnostics (health %, cycle count, voltage, current, charger, cell ID) via `idevicediagnostics`
+- [x] MacInside-style card UI (`MetricCard` component)
 - [ ] Settings (refresh interval, Launch at Login via `SMAppService`)
 - [ ] Sparkle auto-update
 - [ ] Signed/notarized DMG release pipeline
 - [ ] Marketing-name mapping for `ProductType` (e.g. "iPhone15,3" → "iPhone 14 Pro Max")
+- [ ] Battery manufacturer name mapping (no verified serial-prefix source found yet — see `TODOS.md`)
 
 ---
 
