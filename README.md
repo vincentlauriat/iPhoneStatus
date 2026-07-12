@@ -1,6 +1,6 @@
 # iPhoneStatus
 
-![Version](https://img.shields.io/badge/version-0.1.0-blue)
+![Version](https://img.shields.io/badge/version-0.1.1-blue)
 ![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-lightgrey)
 ![Swift](https://img.shields.io/badge/swift-5.9-orange)
 ![Tests](https://img.shields.io/badge/tests-23%20passing-brightgreen)
