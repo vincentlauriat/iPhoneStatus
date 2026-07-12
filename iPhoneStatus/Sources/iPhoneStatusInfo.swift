@@ -13,6 +13,9 @@ struct CarrierBundleInfo: Decodable {
     }
 }
 
+/// Decodes the plist from `ideviceinfo -u <udid> -x` (no domain filter) — the single
+/// call that yields most of the fields iPhoneStatus displays, avoiding a separate
+/// process call per field group.
 struct DeviceGlobalInfo: Decodable {
     let deviceName: String?
     let productType: String?
@@ -34,7 +37,8 @@ struct DeviceGlobalInfo: Decodable {
     let activationState: String?
     let timeZone: String?
 
-    // Cellular — displayed as-is per explicit user choice, see PLAN.md
+    // Cellular — IMEI/ICCID/IMSI/phone number are masked by default in the UI
+    // (SensitiveDataMasking), not here; this struct carries the raw values.
     let telephonyCapability: Bool?
     let sim1IsEmbedded: Bool?
     let simStatus: String?
@@ -238,6 +242,9 @@ struct AdapterDetail: Decodable {
     }
 }
 
+/// The fully-assembled, display-ready snapshot of a connected iPhone's status —
+/// built by `combining(...)` from the separate plist domains `LibimobiledeviceService`
+/// fetches. This is what `PopoverContentView` renders.
 struct iPhoneStatusInfo: Equatable {
     let udid: String
     let connectionType: ConnectionType
@@ -283,7 +290,8 @@ struct iPhoneStatusInfo: Equatable {
     let activationState: String?
     let timeZone: String?
 
-    // Cellular — displayed as-is per explicit user choice, see PLAN.md.
+    // Cellular — raw values; PopoverContentView masks the sensitive ones by default
+    // via SensitiveDataMasking before display.
     let telephonyCapability: Bool?
     let simIsEmbedded: Bool?
     let simStatus: String?
@@ -310,6 +318,9 @@ struct iPhoneStatusInfo: Equatable {
         telephonyCapability == true || imei != nil || iccid != nil || carrierName != nil
     }
 
+    /// Merges the independently-fetched plist domains into one `iPhoneStatusInfo`,
+    /// applying every fallback default (e.g. `"—"` for a missing product type) so
+    /// the UI layer never has to special-case absent fields beyond simple optionals.
     static func combining(
         udid: String,
         connectionType: ConnectionType,

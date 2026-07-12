@@ -1,11 +1,15 @@
 import AppKit
 import SwiftUI
 
+/// Bridges `DeviceMonitor`'s async state stream to SwiftUI's observation system.
 @MainActor
 final class DeviceStatusViewModel: ObservableObject {
     @Published var state: DeviceConnectionState = .disconnected
 }
 
+/// Owns the menu bar icon (`NSStatusItem`) and its popover. Colors the icon per
+/// `DeviceConnectionState` and forwards popover open/close events to `DeviceMonitor`
+/// so detail polling only runs while the user is actually looking.
 @MainActor
 final class StatusMenuController {
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
