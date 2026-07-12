@@ -120,9 +120,9 @@ iPhoneStatus/
 - [x] Comprehensive status: hardware/system/cellular fields, iCloud backup status, screen resolution, extended battery/storage detail, conditional Cellular card
 - [x] Sensitive identifier masking (IMEI/IMEI2/ICCID/IMSI/phone number), on by default, eye-icon toggle to reveal
 - [ ] Signed/notarized DMG release pipeline
+- [x] Custom app icon
 - [ ] Settings (refresh interval, Launch at Login via `SMAppService`)
 - [ ] Sparkle auto-update
-- [ ] Custom app icon
 - [ ] Marketing-name mapping for `ProductType` (e.g. "iPhone15,3" → "iPhone 14 Pro Max")
 - [ ] Battery manufacturer name mapping (no verified serial-prefix source found yet — see `TODOS.md`)
 
