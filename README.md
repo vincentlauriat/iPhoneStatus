@@ -3,9 +3,13 @@
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
 ![Platform](https://img.shields.io/badge/platform-macOS%2014%2B-lightgrey)
 ![Swift](https://img.shields.io/badge/swift-5.9-orange)
-![Tests](https://img.shields.io/badge/tests-29%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-23%20passing-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
 A lightweight macOS menu bar app (AppKit) that shows a comprehensive live status of an iPhone connected over USB — battery health, storage, iOS version, hardware, cellular and connection info — via [libimobiledevice](https://libimobiledevice.org). No app needed on the iPhone side, just the standard "Trust This Computer" prompt. UI design (card style, typography, color rules) matches the MacInside design system.
+
+**Everything stays on your Mac.** iPhoneStatus only talks to your own iPhone over
+USB via `libimobiledevice`; it makes no network requests and sends no data anywhere.
 
 ---
 
@@ -16,7 +20,7 @@ A lightweight macOS menu bar app (AppKit) that shows a comprehensive live status
 | Battery | Level (%), charging state, health (%), cycle count, voltage, current, charger wattage/type, design/nominal/full-charge capacity, estimated time remaining, fully-charged/critical-level flags, battery serial, cell ID |
 | Storage | Total / used capacity with a progress bar, plus data and system partition sizes |
 | Device info | Name, model identifier + hardware model + model number, CPU architecture, iOS version + build (with Beta badge), serial number, activation state, time zone, screen resolution, Wi-Fi/Bluetooth addresses, iCloud backup status |
-| Cellular *(shown only if applicable)* | Carrier name, SIM status, eSIM/physical SIM, IMEI, IMEI2, ICCID, IMSI, phone number — shown unmasked (personal-device tool) |
+| Cellular *(shown only if applicable)* | Carrier name, SIM status, eSIM/physical SIM, IMEI, IMEI2, ICCID, IMSI, phone number — **masked by default**, click the eye icon in the card header to reveal |
 | Connection state | USB presence detection, color-coded menu bar icon |
 | Trust flow | Dedicated UI state while waiting for "Trust This Computer" on the iPhone (also handles denied trust / locked device) |
 | Missing dependency | Guides you to `brew install libimobiledevice` if it isn't installed yet |
@@ -40,17 +44,27 @@ A lightweight macOS menu bar app (AppKit) that shows a comprehensive live status
 | Popover content | SwiftUI (`NSHostingController`) |
 | Device data | libimobiledevice CLI (`idevice_id`, `ideviceinfo`, `idevicediagnostics`) via `Process` |
 | Concurrency | Swift Concurrency (`actor`, `AsyncStream`), `SWIFT_STRICT_CONCURRENCY: targeted` |
-| Tests | XCTest (`iPhoneStatusTests`, 29 unit tests) |
+| Tests | XCTest (`iPhoneStatusTests`, 23 unit tests) |
 | Project generation | [XcodeGen](https://github.com/yonaskolb/XcodeGen) |
 
 See `ARCHITECTURE.md` (French, source-mirrored) / `ARCHITECTURE_EN.md` (English, source of truth) for the full design rationale.
 
 ---
 
+## Installation
+
+Download the latest signed & notarized DMG from the
+[Releases page](https://github.com/vincentlauriat/iPhoneStatus/releases), open it,
+and drag iPhoneStatus into `/Applications`. macOS Gatekeeper should let it run
+without any extra steps since it's notarized by Apple.
+
+You'll also need `libimobiledevice` — the app will guide you through installing
+it (`brew install libimobiledevice`) the first time it can't find it.
+
 ## Build from source
 
 ```bash
-git clone <repo-url> iPhoneStatus
+git clone https://github.com/vincentlauriat/iPhoneStatus.git
 cd iPhoneStatus
 xcodegen generate
 xcodebuild -scheme iPhoneStatus -configuration Debug build
@@ -83,12 +97,14 @@ iPhoneStatus/
 │       ├── LibimobiledeviceBinaryLocator.swift
 │       ├── iPhoneStatusInfo.swift         # plist models + combined struct
 │       ├── DeviceConnectionState.swift    # state enum + stderr classifier
+│       ├── SensitiveDataMasking.swift     # IMEI/ICCID/IMSI/phone masking helper
 │       ├── MetricCard.swift               # reusable card component (MacInside style)
 │       └── PopoverContentView.swift       # SwiftUI popover UI (4 MetricCards, 2 columns, no scroll)
 └── iPhoneStatusTests/
     ├── PlistParsingTests.swift
     ├── ErrorDetectionTests.swift
-    └── BatterySmartInfoParsingTests.swift
+    ├── BatterySmartInfoParsingTests.swift
+    └── SensitiveDataMaskingTests.swift
 ```
 
 ---
@@ -102,14 +118,32 @@ iPhoneStatus/
 - [x] Enriched battery diagnostics (health %, cycle count, voltage, current, charger, cell ID) via `idevicediagnostics`
 - [x] MacInside-style card UI (`MetricCard` component)
 - [x] Comprehensive status: hardware/system/cellular fields, iCloud backup status, screen resolution, extended battery/storage detail, conditional Cellular card
+- [x] Sensitive identifier masking (IMEI/IMEI2/ICCID/IMSI/phone number), on by default, eye-icon toggle to reveal
+- [ ] Signed/notarized DMG release pipeline
 - [ ] Settings (refresh interval, Launch at Login via `SMAppService`)
 - [ ] Sparkle auto-update
-- [ ] Signed/notarized DMG release pipeline
+- [ ] Custom app icon
 - [ ] Marketing-name mapping for `ProductType` (e.g. "iPhone15,3" → "iPhone 14 Pro Max")
 - [ ] Battery manufacturer name mapping (no verified serial-prefix source found yet — see `TODOS.md`)
 
 ---
 
+## Contributing
+
+Bug reports, feature requests, and pull requests are welcome — see
+[`CONTRIBUTING.md`](CONTRIBUTING.md) for setup instructions and code
+conventions, and [`ARCHITECTURE_EN.md`](ARCHITECTURE_EN.md) /
+[`ARCHITECTURE.md`](ARCHITECTURE.md) for the design rationale behind the
+current implementation.
+
+## Privacy
+
+iPhoneStatus reads data only from the iPhone you connect over USB, using the
+same libimobiledevice calls Finder/iTunes use for pairing. Nothing is sent
+over the network — there's no analytics, no telemetry, no backend. Cellular
+identifiers (IMEI, ICCID, IMSI, phone number) are masked on screen by default;
+reveal them per-session with the eye-icon toggle in the Cellular card.
+
 ## License
 
-MIT — see `LICENSE` file (coming soon).
+MIT — see [`LICENSE`](LICENSE).

@@ -1,5 +1,8 @@
 import SwiftUI
 
+/// Root view of the menu bar popover. Renders one of four states — missing
+/// binaries, no device, awaiting trust, or connected (four `MetricCard`s in a
+/// two-column layout) — driven by `DeviceStatusViewModel.state`.
 struct PopoverContentView: View {
     @ObservedObject var viewModel: DeviceStatusViewModel
 
@@ -322,9 +325,29 @@ private struct DeviceCardContent: View {
 private struct CellularCardContent: View {
     let info: iPhoneStatusInfo
 
+    /// Persisted per-machine — off by default so a bystander-visible IMEI
+    /// isn't shown on first launch (see `SensitiveDataMasking`).
+    @AppStorage("showSensitiveIdentifiers") private var showSensitiveIdentifiers = false
+
     var body: some View {
         MetricCard(title: "Cellulaire", systemImage: "antenna.radiowaves.left.and.right") {
             VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Spacer()
+                    Button {
+                        showSensitiveIdentifiers.toggle()
+                    } label: {
+                        Label(
+                            showSensitiveIdentifiers ? "Masquer les identifiants" : "Afficher les identifiants",
+                            systemImage: showSensitiveIdentifiers ? "eye.slash" : "eye"
+                        )
+                        .labelStyle(.iconOnly)
+                        .font(.caption)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.secondary)
+                    .help(showSensitiveIdentifiers ? "Masquer les identifiants sensibles" : "Afficher les identifiants sensibles")
+                }
                 if let carrierName = info.carrierName {
                     InfoRow(label: "Opérateur", value: carrierName)
                 }
@@ -335,19 +358,19 @@ private struct CellularCardContent: View {
                     InfoRow(label: "Type de SIM", value: simIsEmbedded ? "eSIM" : "SIM physique")
                 }
                 if let imei = info.imei {
-                    InfoRow(label: "IMEI", value: imei)
+                    InfoRow(label: "IMEI", value: SensitiveDataMasking.apply(imei, revealed: showSensitiveIdentifiers))
                 }
                 if let imei2 = info.imei2 {
-                    InfoRow(label: "IMEI 2", value: imei2)
+                    InfoRow(label: "IMEI 2", value: SensitiveDataMasking.apply(imei2, revealed: showSensitiveIdentifiers))
                 }
                 if let iccid = info.iccid {
-                    InfoRow(label: "ICCID", value: iccid)
+                    InfoRow(label: "ICCID", value: SensitiveDataMasking.apply(iccid, revealed: showSensitiveIdentifiers))
                 }
                 if let imsi = info.imsi {
-                    InfoRow(label: "IMSI", value: imsi)
+                    InfoRow(label: "IMSI", value: SensitiveDataMasking.apply(imsi, revealed: showSensitiveIdentifiers))
                 }
                 if let phoneNumber = info.phoneNumber {
-                    InfoRow(label: "Numéro de téléphone", value: phoneNumber)
+                    InfoRow(label: "Numéro de téléphone", value: SensitiveDataMasking.apply(phoneNumber, revealed: showSensitiveIdentifiers))
                 }
             }
         }

@@ -10,13 +10,22 @@ private struct ProcessResult {
     let exitCode: Int32
 }
 
+/// Shells out to the libimobiledevice CLI tools (`idevice_id`, `ideviceinfo`,
+/// `idevicediagnostics`) and parses their plist output. No C interop — see
+/// `ARCHITECTURE.md` for why shelling out was chosen over binding `libimobiledevice`
+/// directly.
 struct LibimobiledeviceService: Sendable {
+    /// UDIDs of every iPhone currently visible to `usbmuxd`, USB or paired-Wi-Fi.
+    /// Returns an empty array on any failure (binaries missing, no device, etc.).
     func listConnectedUDIDs() async -> [String] {
         await Task.detached(priority: .utility) {
             (try? Self.runListConnectedUDIDs()) ?? []
         }.value
     }
 
+    /// Fetches and combines every domain iPhoneStatus displays for `udid`. Individual
+    /// domain calls beyond the mandatory global dump are best-effort (`try?`) and
+    /// degrade gracefully — a failure there means fewer detail rows, not a broken state.
     func fetchStatus(udid: String) async -> DeviceConnectionState {
         await Task.detached(priority: .utility) {
             Self.runFetchStatus(udid: udid)

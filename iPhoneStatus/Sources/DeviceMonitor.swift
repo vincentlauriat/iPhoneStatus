@@ -1,5 +1,9 @@
 import Foundation
 
+/// Polls for a connected iPhone and publishes its status as a `DeviceConnectionState`
+/// stream. Presence (`idevice_id -l`) is polled continuously and cheaply; the full
+/// detail fetch (`ideviceinfo`/`idevicediagnostics`, slower) only runs while the
+/// popover is open, on new-device detection, or while not yet connected.
 actor DeviceMonitor {
     private let service = LibimobiledeviceService()
     private var presencePollTask: Task<Void, Never>?
@@ -9,6 +13,7 @@ actor DeviceMonitor {
     private var currentUDID: String?
     private var isPopoverOpen = false
 
+    /// Starts the presence-polling loop (idempotent). Call once, typically at app launch.
     func start() {
         guard presencePollTask == nil else { return }
         presencePollTask = Task { [weak self] in
@@ -19,6 +24,8 @@ actor DeviceMonitor {
         }
     }
 
+    /// A fresh `AsyncStream` per subscriber, replaying the current state immediately
+    /// and yielding every subsequent change. Multiple subscribers are supported.
     var stateStream: AsyncStream<DeviceConnectionState> {
         AsyncStream { continuation in
             let id = UUID()
@@ -30,6 +37,8 @@ actor DeviceMonitor {
         }
     }
 
+    /// Call when the popover opens: triggers an immediate detail refresh and starts
+    /// the slower detail-polling loop for as long as it stays open.
     func popoverDidOpen() {
         isPopoverOpen = true
         if let udid = currentUDID {
@@ -38,6 +47,7 @@ actor DeviceMonitor {
         startDetailPollingIfNeeded()
     }
 
+    /// Call when the popover closes: stops detail polling (presence polling continues).
     func popoverDidClose() {
         isPopoverOpen = false
         detailPollTask?.cancel()

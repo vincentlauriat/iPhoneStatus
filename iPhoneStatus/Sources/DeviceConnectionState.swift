@@ -1,11 +1,13 @@
 import Foundation
 
+/// Why an otherwise-detected iPhone isn't showing data yet.
 enum TrustIssue: Equatable {
     case pendingConfirmation
     case denied
     case passwordProtected
 }
 
+/// The four states `PopoverContentView` renders, driven by `DeviceMonitor`.
 enum DeviceConnectionState: Equatable {
     case binariesNotFound
     case disconnected
@@ -13,6 +15,8 @@ enum DeviceConnectionState: Equatable {
     case connected(iPhoneStatusInfo)
 }
 
+/// Turns `ideviceinfo`'s stderr text into a `TrustIssue`, since libimobiledevice
+/// has no structured error codes for the pairing/trust flow.
 enum StderrClassifier {
     static func classify(_ stderr: String) -> TrustIssue {
         let message = stderr.lowercased()

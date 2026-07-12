@@ -1,5 +1,7 @@
 import AppKit
 
+/// App entry point. Runs as an accessory (menu bar only, no Dock icon/window)
+/// and owns the single `StatusMenuController` for the app's lifetime.
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusMenuController: StatusMenuController?
