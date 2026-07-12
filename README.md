@@ -11,6 +11,8 @@ A lightweight macOS menu bar app (AppKit) that shows a comprehensive live status
 **Everything stays on your Mac.** iPhoneStatus only talks to your own iPhone over
 USB via `libimobiledevice`; it makes no network requests and sends no data anywhere.
 
+**Website:** [vincentlauriat.github.io/iPhoneStatus](https://vincentlauriat.github.io/iPhoneStatus/)
+
 ---
 
 ## Features
