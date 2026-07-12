@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iPhoneStatus — Your iPhone's full status, right in the menu bar</title>
+<meta name="description" content="A lightweight macOS menu bar app that shows a comprehensive live status of an iPhone connected over USB — battery health, storage, hardware, cellular — via libimobiledevice. Free & open-source (MIT), local-only.">
+<meta property="og:title" content="iPhoneStatus">
+<meta property="og:description" content="Battery health, storage, hardware and cellular status for your connected iPhone, right in the macOS menu bar. Free, open-source, local-only.">
+<meta property="og:image" content="https://vincentlauriat.github.io/iPhoneStatus/icon-512.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="icon-180.png">
+<style>
+  :root{
+    --bg:#ffffff; --bg-soft:#f4f3fc; --panel:#ffffff; --line:#e4e1f7;
+    --ink:#161328; --muted:#5c5877; --faint:#8d89a8;
+    --accent:#5b52d6; --accent-deep:#443ca8; --accent-soft:#e7e4fa; --ok:#22b35d;
+    --maxw:1100px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,"Cascadia Code",monospace}
+
+  nav{position:sticky;top:0;z-index:20;backdrop-filter:saturate(180%) blur(12px);background:rgba(255,255,255,.8);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:62px}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:750;letter-spacing:-.2px}
+  .brand img{width:30px;height:30px;border-radius:8px;box-shadow:0 4px 13px rgba(91,82,214,.32)}
+  .nav-links{display:flex;gap:24px;align-items:center;color:var(--muted);font-size:14.5px}
+  .nav-links a:hover{color:var(--ink)}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:11px;font-weight:650;font-size:15px;transition:transform .12s ease,box-shadow .12s ease,background .12s}
+  .btn:hover{transform:translateY(-1px)}
+  .btn-primary{background:linear-gradient(135deg,#5b52d6,#7c6ff0);color:#fff;box-shadow:0 6px 22px rgba(91,82,214,.32)}
+  .btn-ghost{border:1px solid var(--line);color:var(--ink);background:#fff}
+  .btn-ghost:hover{border-color:#c7c2ef;background:var(--bg-soft)}
+  .btn-sm{padding:8px 15px;font-size:14px;border-radius:9px}
+
+  header{padding:74px 0 36px;background:radial-gradient(820px 380px at 80% -8%,rgba(91,82,214,.12),transparent 62%),linear-gradient(180deg,#faf9ff,#fff 70%)}
+  .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
+  .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;color:var(--muted);padding:6px 13px;border-radius:999px;font-size:13px;margin-bottom:22px}
+  .pill b{color:var(--accent)}
+  h1{font-size:clamp(36px,5.4vw,57px);line-height:1.05;font-weight:820;letter-spacing:-1.6px}
+  h1 .grad{background:linear-gradient(120deg,#5b52d6,#443ca8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{max-width:540px;margin:20px 0 0;font-size:clamp(16px,2vw,19px);color:var(--muted)}
+  .cta{display:flex;gap:13px;flex-wrap:wrap;margin:30px 0 14px}
+  .meta{color:var(--faint);font-size:13px;display:flex;flex-wrap:wrap;gap:6px 14px}
+  .meta b{color:var(--muted);font-weight:600}
+
+  .hero-shot{display:flex;justify-content:center}
+  .mock{width:300px;max-width:100%;border-radius:20px;border:1px solid var(--line);box-shadow:0 30px 70px rgba(40,32,90,.18);background:linear-gradient(160deg,#f7f6fe,#fff);padding:18px}
+  .mock-card{background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+  .mock-card:last-child{margin-bottom:0}
+  .mock-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:8px}
+  .mock-row b{color:var(--ink);font-weight:650;font-variant-numeric:tabular-nums}
+  .mock-title{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;color:var(--ink)}
+  .mock-bar{height:6px;border-radius:3px;background:var(--accent-soft);margin-top:10px;overflow:hidden}
+  .mock-bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#5b52d6,#7c6ff0)}
+  .mock-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block}
+  .mock-masked{letter-spacing:1px;color:var(--faint)}
+
+  section{padding:74px 0;border-top:1px solid var(--line)}
+  .eyebrow{color:var(--accent);font-weight:700;font-size:12.5px;letter-spacing:1.4px;text-transform:uppercase}
+  .center{text-align:center}.center .eyebrow{display:block}
+  h2{font-size:clamp(27px,3.7vw,38px);font-weight:800;letter-spacing:-.7px;margin:9px 0 12px}
+  .lead{color:var(--muted);max-width:640px;font-size:17px}
+  .center .lead{margin-left:auto;margin-right:auto}
+
+  .grid{display:grid;gap:16px;margin-top:42px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;transition:border-color .15s,transform .15s,box-shadow .15s}
+  .card:hover{border-color:#cfc9f5;transform:translateY(-2px);box-shadow:0 12px 30px rgba(40,32,90,.08)}
+  .card h3{font-size:16.5px;margin-bottom:5px;letter-spacing:-.2px}
+  .card p{color:var(--muted);font-size:14.5px}
+  .ico{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-deep);font-size:21px;margin-bottom:14px}
+
+  .privacy{background:linear-gradient(135deg,#f4f3fc,#fff);border:1px solid var(--line);border-radius:18px;padding:34px 38px;display:flex;gap:22px;align-items:flex-start}
+  .privacy .ico{margin-bottom:0;flex:none}
+  .privacy h3{font-size:19px;margin-bottom:6px}
+  .privacy p{color:var(--muted);font-size:15px}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:42px;counter-reset:s}
+  .step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;position:relative}
+  .step::before{counter-increment:s;content:counter(s);position:absolute;top:-14px;left:22px;width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#5b52d6,#7c6ff0);color:#fff;font-weight:800;display:grid;place-items:center;font-size:15px}
+  .step h3{margin:6px 0 5px;font-size:16px}
+  .step p{color:var(--muted);font-size:14.5px}
+
+  .final{text-align:center;background:radial-gradient(620px 280px at 50% 120%,rgba(91,82,214,.12),transparent 66%)}
+  .final .cta{justify-content:center}
+  footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-size:14px;text-align:center}
+  footer a{color:var(--accent);font-weight:600}
+  code{background:#161328;border:1px solid var(--line);border-radius:6px;padding:2px 7px;font:13px/1.4 ui-monospace,Menlo,monospace;color:#c7bfff}
+
+  @media(max-width:880px){.hero-grid{grid-template-columns:1fr;gap:30px}.g3{grid-template-columns:1fr}.steps{grid-template-columns:1fr}.nav-links a:not(.btn){display:none}.privacy{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a class="brand" href="#top"><img src="icon-512.png" alt=""><span>iPhoneStatus</span></a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#privacy">Privacy</a>
+    <a href="#install">Install</a>
+    <a href="https://github.com/vincentlauriat/iPhoneStatus">GitHub</a>
+    <a class="btn btn-primary btn-sm" href="https://github.com/vincentlauriat/iPhoneStatus/releases/latest">Download</a>
+  </div>
+</div></nav>
+
+<header id="top"><div class="wrap">
+  <div class="hero-grid">
+    <div>
+      <span class="pill">🔋 Battery health, storage, cellular &amp; more — <b>one glance</b></span>
+      <h1>Your iPhone's<br><span class="grad">full status.</span></h1>
+      <p class="sub">A lightweight menu bar app that shows everything you'd want to know about an iPhone plugged in over USB — battery health, storage, iOS version, hardware, cellular — via libimobiledevice. No app needed on the iPhone side.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="https://github.com/vincentlauriat/iPhoneStatus/releases/latest">⬇︎ Download for macOS</a>
+        <a class="btn btn-ghost" href="https://github.com/vincentlauriat/iPhoneStatus">View on GitHub</a>
+      </div>
+      <p class="meta"><b>Free &amp; open-source (MIT)</b> · macOS 14+ · Signed &amp; notarized · Local-only</p>
+    </div>
+    <div class="hero-shot">
+      <div class="mock" aria-hidden="true">
+        <div class="mock-card">
+          <div class="mock-title">🔋 Battery</div>
+          <div class="mock-row"><span>Level</span><b>82%</b></div>
+          <div class="mock-bar"><i style="width:82%"></i></div>
+          <div class="mock-row"><span>Health</span><b>88%</b></div>
+          <div class="mock-row"><span>Cycle count</span><b>856</b></div>
+        </div>
+        <div class="mock-card">
+          <div class="mock-title">📦 Storage</div>
+          <div class="mock-bar"><i style="width:31%"></i></div>
+          <div class="mock-row"><span>78.2 GB used</span><b>256 GB</b></div>
+        </div>
+        <div class="mock-card">
+          <div class="mock-title">📡 Cellular</div>
+          <div class="mock-row"><span>IMEI</span><b class="mock-masked">•••• 9012</b></div>
+          <div class="mock-row"><span>Status</span><span class="mock-dot"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></header>
+
+<section id="features"><div class="wrap">
+  <div class="center">
+    <p class="eyebrow">features</p>
+    <h2>Everything Finder won't tell you</h2>
+    <p class="lead">A clean SwiftUI popover on top of libimobiledevice's diagnostic domains — battery internals, storage breakdown, hardware and cellular, in one glance.</p>
+  </div>
+  <div class="grid g3">
+    <div class="card"><div class="ico">🔋</div><h3>Battery diagnostics</h3><p>Level, charging state, health %, cycle count, voltage, current, charger wattage/type, design/nominal/full-charge capacity, time remaining.</p></div>
+    <div class="card"><div class="ico">📦</div><h3>Storage breakdown</h3><p>Total &amp; used capacity with a progress bar, plus data and system partition sizes.</p></div>
+    <div class="card"><div class="ico">📱</div><h3>Hardware &amp; system</h3><p>Model, hardware model, CPU architecture, iOS version + build (Beta badge), serial number, activation state, time zone, screen resolution, iCloud backup status.</p></div>
+    <div class="card"><div class="ico">📡</div><h3>Cellular, masked by default</h3><p>Carrier, SIM status, IMEI/IMEI2/ICCID/IMSI, phone number — masked on screen, one click on the eye icon to reveal.</p></div>
+    <div class="card"><div class="ico">🤝</div><h3>Trust-flow handling</h3><p>A dedicated UI state while waiting for "Trust This Computer" — also handles denied trust and a locked device.</p></div>
+    <div class="card"><div class="ico">🧭</div><h3>Guided setup</h3><p>Missing <code>libimobiledevice</code>? The app tells you and gives you the exact <code>brew install</code> command.</p></div>
+  </div>
+</div></section>
+
+<section id="privacy"><div class="wrap">
+  <div class="privacy">
+    <div class="ico" style="width:52px;height:52px;font-size:26px">🔒</div>
+    <div>
+      <h3>Everything stays on your Mac</h3>
+      <p>iPhoneStatus only talks to your own iPhone over USB via <code>libimobiledevice</code> — no network requests, no analytics, no backend. Sensitive cellular identifiers are masked by default; you choose when to reveal them.</p>
+    </div>
+  </div>
+</div></section>
+
+<section id="install"><div class="wrap">
+  <div class="center">
+    <p class="eyebrow">get started</p>
+    <h2>Up and running in a minute</h2>
+    <p class="lead">Notarized by Apple — it launches by double-click, no configuration needed.</p>
+  </div>
+  <div class="steps">
+    <div class="step"><h3>Download</h3><p>Grab the latest signed <code>.dmg</code> from GitHub Releases and open it.</p></div>
+    <div class="step"><h3>Install</h3><p>Drag <code>iPhoneStatus.app</code> into <code>/Applications</code>.</p></div>
+    <div class="step"><h3>Plug in your iPhone</h3><p>Connect over USB and accept "Trust This Computer" — that's it.</p></div>
+  </div>
+</div></section>
+
+<section class="final"><div class="wrap">
+  <p class="eyebrow">ready?</p>
+  <h2>See your iPhone's real status</h2>
+  <p class="lead" style="margin:0 auto 6px">Free, open-source and local-only. macOS 14 Sonoma or later.</p>
+  <div class="cta">
+    <a class="btn btn-primary" href="https://github.com/vincentlauriat/iPhoneStatus/releases/latest">⬇︎ Download for macOS</a>
+    <a class="btn btn-ghost" href="https://github.com/vincentlauriat/iPhoneStatus#readme">Read the docs</a>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  iPhoneStatus · MIT License · © 2026 Vincent Lauriat ·
+  <a href="https://github.com/vincentlauriat/iPhoneStatus">github.com/vincentlauriat/iPhoneStatus</a>
+  · <a href="https://lauriat.fr/outils/iphonestatus/">lauriat.fr</a>
+</div></footer>
+
+</body>
+</html>
