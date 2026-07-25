@@ -11,6 +11,10 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="assets/base.css">
 <style>
   :root{
     --bg:#ffffff; --bg-soft:#f4f3fc; --panel:#ffffff; --line:#e4e1f7;
@@ -23,7 +27,7 @@
   body{background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
   a{color:inherit;text-decoration:none}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
-  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,"Cascadia Code",monospace}
+  .mono{font-family:var(--font-mono)}
 
   nav{position:sticky;top:0;z-index:20;backdrop-filter:saturate(180%) blur(12px);background:rgba(255,255,255,.8);border-bottom:1px solid var(--line)}
   nav .wrap{display:flex;align-items:center;justify-content:space-between;height:62px}
@@ -91,20 +95,13 @@
   .final .cta{justify-content:center}
   footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-size:14px;text-align:center}
   footer a{color:var(--accent);font-weight:600}
-  code{background:#161328;border:1px solid var(--line);border-radius:6px;padding:2px 7px;font:13px/1.4 ui-monospace,Menlo,monospace;color:#c7bfff}
+  code{background:#161328;border:1px solid var(--line);border-radius:6px;padding:2px 7px;font:13px/1.4 var(--font-mono);color:#c7bfff}
 
   @media(max-width:880px){.hero-grid{grid-template-columns:1fr;gap:30px}.g3{grid-template-columns:1fr}.steps{grid-template-columns:1fr}.nav-links a:not(.btn){display:none}.privacy{flex-direction:column}}
-
-  /* a11y : respecter la préférence système de mouvement réduit */
-  @media (prefers-reduced-motion: reduce){
-    *,*::before,*::after{
-      animation-duration:.01ms !important;animation-iteration-count:1 !important;
-      transition-duration:.01ms !important;scroll-behavior:auto !important;
-    }
-  }
 </style>
 </head>
 <body>
+<a class="skip" href="#top">Skip to content</a>
 
 <nav><div class="wrap">
   <a class="brand" href="#top"><img src="icon-512.png" alt=""><span>iPhoneStatus</span></a>
