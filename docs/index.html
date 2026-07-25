@@ -94,6 +94,14 @@
   code{background:#161328;border:1px solid var(--line);border-radius:6px;padding:2px 7px;font:13px/1.4 ui-monospace,Menlo,monospace;color:#c7bfff}
 
   @media(max-width:880px){.hero-grid{grid-template-columns:1fr;gap:30px}.g3{grid-template-columns:1fr}.steps{grid-template-columns:1fr}.nav-links a:not(.btn){display:none}.privacy{flex-direction:column}}
+
+  /* a11y : respecter la préférence système de mouvement réduit */
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+      animation-duration:.01ms !important;animation-iteration-count:1 !important;
+      transition-duration:.01ms !important;scroll-behavior:auto !important;
+    }
+  }
 </style>
 </head>
 <body>
