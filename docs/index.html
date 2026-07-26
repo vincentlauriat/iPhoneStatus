@@ -98,52 +98,68 @@
   code{background:#161328;border:1px solid var(--line);border-radius:6px;padding:2px 7px;font:13px/1.4 var(--font-mono);color:#c7bfff}
 
   @media(max-width:880px){.hero-grid{grid-template-columns:1fr;gap:30px}.g3{grid-template-columns:1fr}.steps{grid-template-columns:1fr}.nav-links a:not(.btn){display:none}.privacy{flex-direction:column}}
+
+  .langtog{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;flex:none}
+  .langtog button{background:transparent;border:0;color:var(--muted);font:600 12.5px/1 var(--font-mono);
+    padding:0 10px;min-height:36px;cursor:pointer}
+  .langtog button+button{border-left:1px solid var(--line)}
+  .langtog button:hover{color:var(--txt)}
+  .langtog button.on{background:var(--accent);color:var(--on-accent)}
+  /* En francais les libelles de nav sont plus longs qu'en anglais : sous 600px
+     la barre deborde de quelques pixels. On resserre le selecteur plutot que
+     de raccourcir un libelle correct. */
+  @media(max-width:600px){.langtog button{padding:0 7px;font-size:11.5px}}
 </style>
 </head>
 <body>
-<a class="skip" href="#top">Skip to content</a>
+<a class="skip" href="#top"><span class="en">Skip to content</span><span class="fr">Aller au contenu</span><span class="zh">跳至內容</span></a>
 
 <nav><div class="wrap">
   <a class="brand" href="#top"><img src="icon-512.png" alt=""><span>iPhoneStatus</span></a>
   <div class="nav-links">
-    <a href="#features">Features</a>
-    <a href="#privacy">Privacy</a>
-    <a href="#install">Install</a>
+    <a href="#features"><span class="en">Features</span><span class="fr">Fonctions</span><span class="zh">功能</span></a>
+    <a href="#privacy"><span class="en">Privacy</span><span class="fr">Vie privée</span><span class="zh">隱私</span></a>
+    <a href="#install"><span class="en">Install</span><span class="fr">Installer</span><span class="zh">安裝</span></a>
     <a href="https://github.com/vincentlauriat/iPhoneStatus">GitHub</a>
-    <a class="btn btn-primary btn-sm" href="https://github.com/vincentlauriat/iPhoneStatus/releases/latest">Download</a>
+    <div class="langtog" role="group" aria-label="Language / Langue / 語言">
+    <button type="button" data-lang="en" class="on" onclick="setLang('en')">EN</button>
+    <button type="button" data-lang="fr" onclick="setLang('fr')">FR</button>
+    <button type="button" data-lang="zh" onclick="setLang('zh')">中文</button>
+  </div>
+    <a class="btn btn-primary btn-sm" href="https://github.com/vincentlauriat/iPhoneStatus/releases/latest"><span class="en">Download</span><span class="fr">Télécharger</span><span class="zh">下載</span></a>
   </div>
 </div></nav>
 
 <header id="top"><div class="wrap">
   <div class="hero-grid">
     <div>
-      <span class="pill">🔋 Battery health, storage, cellular &amp; more — <b>one glance</b></span>
-      <h1>Your iPhone's<br><span class="grad">full status.</span></h1>
-      <p class="sub">A lightweight menu bar app that shows everything you'd want to know about an iPhone plugged in over USB — battery health, storage, iOS version, hardware, cellular — via libimobiledevice. No app needed on the iPhone side.</p>
+      <span class="pill">🔋 <span class="en">Battery health, storage, cellular &amp; more — <b>one glance</b></span><span class="fr">Santé de la batterie, stockage, cellulaire et plus — <b>d'un coup d'œil</b></span><span class="zh">電池健康度、儲存空間、行動網路等等——<b>一眼看完</b></span></span>
+      <h1><span class="en">Your iPhone's<br><span class="grad">full status.</span></span><span class="fr">Le statut complet<br><span class="grad">de votre iPhone.</span></span><span class="zh">你的 iPhone <span class="grad">完整狀態。</span></span></h1>
+      <p class="sub"><span class="en">A lightweight menu bar app that shows everything you'd want to know about an iPhone plugged in over USB — battery health, storage, iOS version, hardware, cellular — via libimobiledevice. No app needed on the iPhone side.</span><span class="fr">Une app légère en barre de menus qui montre tout ce que vous voulez savoir d'un iPhone branché en USB — santé de la batterie, stockage, version d'iOS, matériel, cellulaire — via libimobiledevice. Aucune app à installer côté iPhone.</span><span class="zh">輕量的選單列應用程式，透過 libimobiledevice 顯示以 USB 連接的 iPhone 你會想知道的一切——電池健康度、儲存空間、iOS 版本、硬體、行動網路。iPhone 端不需安裝任何 app。</span></p>
       <div class="cta">
-        <a class="btn btn-primary" href="https://github.com/vincentlauriat/iPhoneStatus/releases/latest">⬇︎ Download for macOS</a>
-        <a class="btn btn-ghost" href="https://github.com/vincentlauriat/iPhoneStatus">View on GitHub</a>
+        <a class="btn btn-primary" href="https://github.com/vincentlauriat/iPhoneStatus/releases/latest">⬇︎ <span class="en">Download for macOS</span><span class="fr">Télécharger pour macOS</span><span class="zh">下載 macOS 版</span></a>
+        <a class="btn btn-ghost" href="https://github.com/vincentlauriat/iPhoneStatus"><span class="en">View on GitHub</span><span class="fr">Voir sur GitHub</span><span class="zh">在 GitHub 上檢視</span></a>
       </div>
-      <p class="meta"><b>Free &amp; open-source (MIT)</b> · macOS 14+ · Signed &amp; notarized · Local-only</p>
+      <p class="meta"><span class="en"><b>Free &amp; open-source (MIT)</b> · macOS 14+ · Signed &amp; notarized · Local-only</span><span class="fr"><b>Gratuit et open source (MIT)</b> · macOS 14+ · Signé et notarié · 100 % local</span><span class="zh"><b>免費開源（MIT）</b> · macOS 14+ · 已簽章與公證 · 純本機運作</span></p>
     </div>
     <div class="hero-shot">
       <div class="mock" aria-hidden="true">
         <div class="mock-card">
-          <div class="mock-title">🔋 Battery</div>
-          <div class="mock-row"><span>Level</span><b>82%</b></div>
+          <div class="mock-title">🔋 <span class="en">Battery</span><span class="fr">Batterie</span><span class="zh">電池</span></div>
+          <div class="mock-row"><span><span class="en">Level</span><span class="fr">Niveau</span><span class="zh">電量</span></span><b>82%</b></div>
           <div class="mock-bar"><i style="width:82%"></i></div>
-          <div class="mock-row"><span>Health</span><b>88%</b></div>
-          <div class="mock-row"><span>Cycle count</span><b>856</b></div>
+          <div class="mock-row"><span><span class="en">Health</span><span class="fr">Santé</span><span class="zh">健康度</span></span><b>88%</b></div>
+          <div class="mock-row"><span><span class="en">Cycle count</span><span class="fr">Cycles</span><span class="zh">循環次數</span></span><b>856</b></div>
         </div>
         <div class="mock-card">
-          <div class="mock-title">📦 Storage</div>
+          <div class="mock-title">📦 <span class="en">Storage</span><span class="fr">Stockage</span><span class="zh">儲存空間</span></div>
           <div class="mock-bar"><i style="width:31%"></i></div>
-          <div class="mock-row"><span>78.2 GB used</span><b>256 GB</b></div>
+          <div class="mock-row"><span><span class="en">78.2 GB used</span><span class="fr">78,2 Go utilisés</span><span class="zh">已用 78.2 GB</span></span><b>256 GB</b></div>
         </div>
         <div class="mock-card">
-          <div class="mock-title">📡 Cellular</div>
+          <div class="mock-title">📡 <span class="en">Cellular</span><span class="fr">Cellulaire</span><span class="zh">行動網路</span></div>
           <div class="mock-row"><span>IMEI</span><b class="mock-masked">•••• 9012</b></div>
-          <div class="mock-row"><span>Status</span><span class="mock-dot"></span></div>
+          <div class="mock-row"><span><span class="en">Status</span><span class="fr">État</span><span class="zh">狀態</span></span><span class="mock-dot"></span></div>
         </div>
       </div>
     </div>
@@ -152,17 +168,17 @@
 
 <section id="features"><div class="wrap">
   <div class="center">
-    <p class="eyebrow">features</p>
-    <h2>Everything Finder won't tell you</h2>
-    <p class="lead">A clean SwiftUI popover on top of libimobiledevice's diagnostic domains — battery internals, storage breakdown, hardware and cellular, in one glance.</p>
+    <p class="eyebrow"><span class="en">features</span><span class="fr">fonctions</span><span class="zh">功能</span></p>
+    <h2><span class="en">Everything Finder won't tell you</span><span class="fr">Tout ce que le Finder ne vous dit pas</span><span class="zh">Finder 不會告訴你的一切</span></h2>
+    <p class="lead"><span class="en">A clean SwiftUI popover on top of libimobiledevice's diagnostic domains — battery internals, storage breakdown, hardware and cellular, in one glance.</span><span class="fr">Un popover SwiftUI net posé sur les domaines de diagnostic de libimobiledevice — internes de la batterie, détail du stockage, matériel et cellulaire, d'un seul coup d'œil.</span><span class="zh">在 libimobiledevice 的診斷網域之上，疊了一個簡潔的 SwiftUI 彈出視窗——電池內部數據、儲存空間細項、硬體與行動網路，一眼看完。</span></p>
   </div>
   <div class="grid g3">
-    <div class="card"><div class="ico">🔋</div><h3>Battery diagnostics</h3><p>Level, charging state, health %, cycle count, voltage, current, charger wattage/type, design/nominal/full-charge capacity, time remaining.</p></div>
-    <div class="card"><div class="ico">📦</div><h3>Storage breakdown</h3><p>Total &amp; used capacity with a progress bar, plus data and system partition sizes.</p></div>
-    <div class="card"><div class="ico">📱</div><h3>Hardware &amp; system</h3><p>Model, hardware model, CPU architecture, iOS version + build (Beta badge), serial number, activation state, time zone, screen resolution, iCloud backup status.</p></div>
-    <div class="card"><div class="ico">📡</div><h3>Cellular, masked by default</h3><p>Carrier, SIM status, IMEI/IMEI2/ICCID/IMSI, phone number — masked on screen, one click on the eye icon to reveal.</p></div>
-    <div class="card"><div class="ico">🤝</div><h3>Trust-flow handling</h3><p>A dedicated UI state while waiting for "Trust This Computer" — also handles denied trust and a locked device.</p></div>
-    <div class="card"><div class="ico">🧭</div><h3>Guided setup</h3><p>Missing <code>libimobiledevice</code>? The app tells you and gives you the exact <code>brew install</code> command.</p></div>
+    <div class="card"><div class="ico">🔋</div><h3><span class="en">Battery diagnostics</span><span class="fr">Diagnostic de batterie</span><span class="zh">電池診斷</span></h3><p><span class="en">Level, charging state, health %, cycle count, voltage, current, charger wattage/type, design/nominal/full-charge capacity, time remaining.</span><span class="fr">Niveau, état de charge, santé en %, cycles, tension, courant, puissance et type du chargeur, capacité de conception / nominale / à pleine charge, autonomie restante.</span><span class="zh">電量、充電狀態、健康度百分比、循環次數、電壓、電流、充電器瓦數與類型、設計／標稱／滿充容量，以及剩餘時間。</span></p></div>
+    <div class="card"><div class="ico">📦</div><h3><span class="en">Storage breakdown</span><span class="fr">Détail du stockage</span><span class="zh">儲存空間細項</span></h3><p><span class="en">Total &amp; used capacity with a progress bar, plus data and system partition sizes.</span><span class="fr">Capacité totale et utilisée avec barre de progression, plus la taille des partitions data et système.</span><span class="zh">以進度條顯示總容量與已用容量，並附資料與系統分割區的大小。</span></p></div>
+    <div class="card"><div class="ico">📱</div><h3><span class="en">Hardware &amp; system</span><span class="fr">Matériel et système</span><span class="zh">硬體與系統</span></h3><p><span class="en">Model, hardware model, CPU architecture, iOS version + build (Beta badge), serial number, activation state, time zone, screen resolution, iCloud backup status.</span><span class="fr">Modèle, modèle matériel, architecture CPU, version d'iOS + build (badge Beta), numéro de série, état d'activation, fuseau horaire, résolution d'écran, état de la sauvegarde iCloud.</span><span class="zh">型號、硬體型號、CPU 架構、iOS 版本與 build（含 Beta 標籤）、序號、啟用狀態、時區、螢幕解析度、iCloud 備份狀態。</span></p></div>
+    <div class="card"><div class="ico">📡</div><h3><span class="en">Cellular, masked by default</span><span class="fr">Cellulaire, masqué par défaut</span><span class="zh">行動網路，預設遮蔽</span></h3><p><span class="en">Carrier, SIM status, IMEI/IMEI2/ICCID/IMSI, phone number — masked on screen, one click on the eye icon to reveal.</span><span class="fr">Opérateur, état de la SIM, IMEI/IMEI2/ICCID/IMSI, numéro de téléphone — masqués à l'écran, un clic sur l'œil pour les révéler.</span><span class="zh">電信業者、SIM 狀態、IMEI／IMEI2／ICCID／IMSI、電話號碼——畫面上預設遮蔽，點一下眼睛圖示即可顯示。</span></p></div>
+    <div class="card"><div class="ico">🤝</div><h3><span class="en">Trust-flow handling</span><span class="fr">Gestion du flux de confiance</span><span class="zh">信任流程處理</span></h3><p><span class="en">A dedicated UI state while waiting for "Trust This Computer" — also handles denied trust and a locked device.</span><span class="fr">Un état d'interface dédié pendant l'attente de « Se fier à cet ordinateur » — gère aussi le refus et l'appareil verrouillé.</span><span class="zh">在等待「信任這台電腦」時提供專屬的介面狀態——也會處理拒絕信任與裝置已鎖定的情況。</span></p></div>
+    <div class="card"><div class="ico">🧭</div><h3><span class="en">Guided setup</span><span class="fr">Installation guidée</span><span class="zh">引導式設定</span></h3><p><span class="en">Missing <code>libimobiledevice</code>? The app tells you and gives you the exact <code>brew install</code> command.</span><span class="fr"><code>libimobiledevice</code> absent ? L'app vous le dit et vous donne la commande <code>brew install</code> exacte.</span><span class="zh">少了 <code>libimobiledevice</code>？應用程式會告訴你，並直接給出正確的 <code>brew install</code> 指令。</span></p></div>
   </div>
 </div></section>
 
@@ -170,40 +186,68 @@
   <div class="privacy">
     <div class="ico" style="width:52px;height:52px;font-size:26px">🔒</div>
     <div>
-      <h3>Everything stays on your Mac</h3>
-      <p>iPhoneStatus only talks to your own iPhone over USB via <code>libimobiledevice</code> — no network requests, no analytics, no backend. Sensitive cellular identifiers are masked by default; you choose when to reveal them.</p>
+      <h3><span class="en">Everything stays on your Mac</span><span class="fr">Tout reste sur votre Mac</span><span class="zh">一切都留在你的 Mac 上</span></h3>
+      <p><span class="en">iPhoneStatus only talks to your own iPhone over USB via <code>libimobiledevice</code> — no network requests, no analytics, no backend. Sensitive cellular identifiers are masked by default; you choose when to reveal them.</span><span class="fr">iPhoneStatus ne parle qu'à votre propre iPhone, en USB, via <code>libimobiledevice</code> — aucune requête réseau, aucune analytique, aucun backend. Les identifiants cellulaires sensibles sont masqués par défaut ; c'est vous qui décidez de les révéler.</span><span class="zh">iPhoneStatus 只透過 <code>libimobiledevice</code> 以 USB 與你自己的 iPhone 溝通——沒有網路請求、沒有分析追蹤、沒有後端。敏感的行動網路識別碼預設遮蔽，何時顯示由你決定。</span></p>
     </div>
   </div>
 </div></section>
 
 <section id="install"><div class="wrap">
   <div class="center">
-    <p class="eyebrow">get started</p>
-    <h2>Up and running in a minute</h2>
-    <p class="lead">Notarized by Apple — it launches by double-click, no configuration needed.</p>
+    <p class="eyebrow"><span class="en">get started</span><span class="fr">démarrer</span><span class="zh">開始使用</span></p>
+    <h2><span class="en">Up and running in a minute</span><span class="fr">Opérationnel en une minute</span><span class="zh">一分鐘內開始使用</span></h2>
+    <p class="lead"><span class="en">Notarized by Apple — it launches by double-click, no configuration needed.</span><span class="fr">Notariée par Apple — elle se lance d'un double-clic, sans configuration.</span><span class="zh">已通過 Apple 公證——按兩下即可啟動，不需任何設定。</span></p>
   </div>
   <div class="steps">
-    <div class="step"><h3>Download</h3><p>Grab the latest signed <code>.dmg</code> from GitHub Releases and open it.</p></div>
-    <div class="step"><h3>Install</h3><p>Drag <code>iPhoneStatus.app</code> into <code>/Applications</code>.</p></div>
-    <div class="step"><h3>Plug in your iPhone</h3><p>Connect over USB and accept "Trust This Computer" — that's it.</p></div>
+    <div class="step"><h3><span class="en">Download</span><span class="fr">Télécharger</span><span class="zh">下載</span></h3><p><span class="en">Grab the latest signed <code>.dmg</code> from GitHub Releases and open it.</span><span class="fr">Récupérez le dernier <code>.dmg</code> signé depuis GitHub Releases et ouvrez-le.</span><span class="zh">從 GitHub Releases 取得最新的已簽章 <code>.dmg</code> 並開啟。</span></p></div>
+    <div class="step"><h3><span class="en">Install</span><span class="fr">Installer</span><span class="zh">安裝</span></h3><p><span class="en">Drag <code>iPhoneStatus.app</code> into <code>/Applications</code>.</span><span class="fr">Glissez <code>iPhoneStatus.app</code> dans <code>/Applications</code>.</span><span class="zh">將 <code>iPhoneStatus.app</code> 拖入 <code>/Applications</code>。</span></p></div>
+    <div class="step"><h3><span class="en">Plug in your iPhone</span><span class="fr">Branchez votre iPhone</span><span class="zh">接上你的 iPhone</span></h3><p><span class="en">Connect over USB and accept "Trust This Computer" — that's it.</span><span class="fr">Branchez en USB et acceptez « Se fier à cet ordinateur » — c'est tout.</span><span class="zh">以 USB 連接並接受「信任這台電腦」——就這樣。</span></p></div>
   </div>
 </div></section>
 
 <section class="final"><div class="wrap">
-  <p class="eyebrow">ready?</p>
-  <h2>See your iPhone's real status</h2>
-  <p class="lead" style="margin:0 auto 6px">Free, open-source and local-only. macOS 14 Sonoma or later.</p>
+  <p class="eyebrow"><span class="en">ready?</span><span class="fr">prêt ?</span><span class="zh">準備好了嗎？</span></p>
+  <h2><span class="en">See your iPhone's real status</span><span class="fr">Voyez le vrai statut de votre iPhone</span><span class="zh">看看你 iPhone 的真實狀態</span></h2>
+  <p class="lead" style="margin:0 auto 6px"><span class="en">Free, open-source and local-only. macOS 14 Sonoma or later.</span><span class="fr">Gratuite, open source et 100 % locale. macOS 14 Sonoma ou ultérieur.</span><span class="zh">免費、開源、純本機運作。macOS 14 Sonoma 或以上版本。</span></p>
   <div class="cta">
-    <a class="btn btn-primary" href="https://github.com/vincentlauriat/iPhoneStatus/releases/latest">⬇︎ Download for macOS</a>
-    <a class="btn btn-ghost" href="https://github.com/vincentlauriat/iPhoneStatus#readme">Read the docs</a>
+    <a class="btn btn-primary" href="https://github.com/vincentlauriat/iPhoneStatus/releases/latest">⬇︎ <span class="en">Download for macOS</span><span class="fr">Télécharger pour macOS</span><span class="zh">下載 macOS 版</span></a>
+    <a class="btn btn-ghost" href="https://github.com/vincentlauriat/iPhoneStatus#readme"><span class="en">Read the docs</span><span class="fr">Lire la doc</span><span class="zh">閱讀說明文件</span></a>
   </div>
 </div></section>
 
 <footer><div class="wrap">
-  iPhoneStatus · MIT License · © 2026 Vincent Lauriat ·
+  iPhoneStatus · <span class="en">MIT License</span><span class="fr">Licence MIT</span><span class="zh">MIT 授權</span> · © 2026 Vincent Lauriat ·
   <a href="https://github.com/vincentlauriat/iPhoneStatus">github.com/vincentlauriat/iPhoneStatus</a>
   · <a href="https://lauriat.fr/outils/iphonestatus/">lauriat.fr</a>
 </div></footer>
 
+<script>
+  /* zh-Hant et non zh : sur un système configuré en chinois simplifié, un
+     simple `zh` laisse le navigateur choisir une fonte Han simplifiée, qui
+     rend certains caractères traditionnels dans la mauvaise forme. */
+  var LANG_TAG={en:'en',fr:'fr',zh:'zh-Hant'};
+  function setLang(l){
+    if(!LANG_TAG[l]) l='en';
+    document.body.classList.remove('lang-en','lang-fr','lang-zh');
+    document.body.classList.add('lang-'+l);
+    document.documentElement.lang=LANG_TAG[l];
+    /* On boucle sur les boutons au lieu de les nommer un par un : ajouter une
+       4e langue ne demandera alors aucune retouche de ce script. */
+    document.querySelectorAll('.langtog button').forEach(function(b){
+      var on=b.dataset.lang===l;
+      b.classList.toggle('on',on);
+      b.setAttribute('aria-pressed',on?'true':'false');
+    });
+    try{localStorage.setItem('vl-lang',l)}catch(e){}
+  }
+  (function(){
+    var saved;try{saved=localStorage.getItem('vl-lang')}catch(e){}
+    var n=(navigator.language||'en').slice(0,2).toLowerCase();
+    /* Le traditionnel est servi a tout visiteur sinophone, y compris zh-CN :
+       c'est la seule variante chinoise disponible, et la renvoyer vaut mieux
+       que de rabattre ce visiteur sur l'anglais. */
+    setLang(saved||(n==='zh'?'zh':(n==='fr'?'fr':'en')));
+  })();
+</script>
 </body>
 </html>
