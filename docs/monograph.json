@@ -1,0 +1,262 @@
+{
+  "name": "iPhoneStatus",
+  "no": "19",
+  "repo": "vincentlauriat/iPhoneStatus",
+  "url": "https://vincentlauriat.github.io/iPhoneStatus/",
+  "accent": "#5b52d6",
+  "meta": {
+    "title": "iPhoneStatus — Your iPhone's full status, right in the menu bar",
+    "description": "A lightweight macOS menu bar app that shows a comprehensive live status of an iPhone connected over USB — battery health, storage, hardware, cellular — via libimobiledevice. Free & open-source (MIT), local-only.",
+    "favicon": "icon-180.png",
+    "og_image": "https://vincentlauriat.github.io/iPhoneStatus/icon-512.png"
+  },
+  "role": {
+    "en": "Battery health, storage, cellular &amp; more — one glance",
+    "fr": "Santé de la batterie, stockage, cellulaire et plus — d'un coup d'œil",
+    "zh": "電池健康度、儲存空間、行動網路等等——一眼看完"
+  },
+  "thesis": {
+    "en": "Your iPhone's full status.",
+    "fr": "Le statut complet de votre iPhone.",
+    "zh": "你的 iPhone 完整狀態。"
+  },
+  "lede": {
+    "en": "A lightweight menu bar app that shows everything you'd want to know about an iPhone plugged in over USB — battery health, storage, iOS version, hardware, cellular — via libimobiledevice. No app needed on the iPhone side.",
+    "fr": "Une app légère en barre de menus qui montre tout ce que vous voulez savoir d'un iPhone branché en USB — santé de la batterie, stockage, version d'iOS, matériel, cellulaire — via libimobiledevice. Aucune app à installer côté iPhone.",
+    "zh": "輕量的選單列應用程式，透過 libimobiledevice 顯示以 USB 連接的 iPhone 你會想知道的一切——電池健康度、儲存空間、iOS 版本、硬體、行動網路。iPhone 端不需安裝任何 app。"
+  },
+  "actions": [
+    {
+      "primary": true,
+      "href": "https://github.com/vincentlauriat/iPhoneStatus/releases/latest",
+      "label": {
+        "en": "Download for macOS",
+        "fr": "Télécharger pour macOS",
+        "zh": "下載 macOS 版"
+      }
+    },
+    {
+      "href": "https://github.com/vincentlauriat/iPhoneStatus",
+      "label": {
+        "en": "View on GitHub",
+        "fr": "Voir sur GitHub",
+        "zh": "在 GitHub 上檢視"
+      }
+    }
+  ],
+  "facts": [
+    {
+      "k": {
+        "en": "Requires",
+        "fr": "Configuration",
+        "zh": "系統需求"
+      },
+      "v": "macOS 14+"
+    },
+    {
+      "k": {
+        "en": "Distribution",
+        "fr": "Distribution",
+        "zh": "發行"
+      },
+      "v": {
+        "en": "Signed &amp; notarized",
+        "fr": "Signé et notarié",
+        "zh": "已簽章與公證"
+      }
+    },
+    {
+      "k": {
+        "en": "Licence",
+        "fr": "Licence",
+        "zh": "授權"
+      },
+      "v": {
+        "en": "Free &amp; open-source (MIT)",
+        "fr": "Gratuit et open source (MIT)",
+        "zh": "免費開源（MIT）"
+      }
+    }
+  ],
+  "opener": {
+    "h": {
+      "en": "Everything Finder won't tell you",
+      "fr": "Tout ce que le Finder ne vous dit pas",
+      "zh": "Finder 不會告訴你的一切"
+    },
+    "p": {
+      "en": "A clean SwiftUI popover on top of libimobiledevice's diagnostic domains — battery internals, storage breakdown, hardware and cellular, in one glance.",
+      "fr": "Un popover SwiftUI net posé sur les domaines de diagnostic de libimobiledevice — internes de la batterie, détail du stockage, matériel et cellulaire, d'un seul coup d'œil.",
+      "zh": "在 libimobiledevice 的診斷網域之上，疊了一個簡潔的 SwiftUI 彈出視窗——電池內部數據、儲存空間細項、硬體與行動網路，一眼看完。"
+    }
+  },
+  "features": [
+    {
+      "h": {
+        "en": "Battery diagnostics",
+        "fr": "Diagnostic de batterie",
+        "zh": "電池診斷"
+      },
+      "p": {
+        "en": "Level, charging state, health %, cycle count, voltage, current, charger wattage/type, design/nominal/full-charge capacity, time remaining.",
+        "fr": "Niveau, état de charge, santé en %, cycles, tension, courant, puissance et type du chargeur, capacité de conception / nominale / à pleine charge, autonomie restante.",
+        "zh": "電量、充電狀態、健康度百分比、循環次數、電壓、電流、充電器瓦數與類型、設計／標稱／滿充容量，以及剩餘時間。"
+      }
+    },
+    {
+      "h": {
+        "en": "Storage breakdown",
+        "fr": "Détail du stockage",
+        "zh": "儲存空間細項"
+      },
+      "p": {
+        "en": "Total &amp; used capacity with a progress bar, plus data and system partition sizes.",
+        "fr": "Capacité totale et utilisée avec barre de progression, plus la taille des partitions data et système.",
+        "zh": "以進度條顯示總容量與已用容量，並附資料與系統分割區的大小。"
+      }
+    },
+    {
+      "h": {
+        "en": "Hardware &amp; system",
+        "fr": "Matériel et système",
+        "zh": "硬體與系統"
+      },
+      "p": {
+        "en": "Model, hardware model, CPU architecture, iOS version + build (Beta badge), serial number, activation state, time zone, screen resolution, iCloud backup status.",
+        "fr": "Modèle, modèle matériel, architecture CPU, version d'iOS + build (badge Beta), numéro de série, état d'activation, fuseau horaire, résolution d'écran, état de la sauvegarde iCloud.",
+        "zh": "型號、硬體型號、CPU 架構、iOS 版本與 build（含 Beta 標籤）、序號、啟用狀態、時區、螢幕解析度、iCloud 備份狀態。"
+      }
+    },
+    {
+      "h": {
+        "en": "Cellular, masked by default",
+        "fr": "Cellulaire, masqué par défaut",
+        "zh": "行動網路，預設遮蔽"
+      },
+      "p": {
+        "en": "Carrier, SIM status, IMEI/IMEI2/ICCID/IMSI, phone number — masked on screen, one click on the eye icon to reveal.",
+        "fr": "Opérateur, état de la SIM, IMEI/IMEI2/ICCID/IMSI, numéro de téléphone — masqués à l'écran, un clic sur l'œil pour les révéler.",
+        "zh": "電信業者、SIM 狀態、IMEI／IMEI2／ICCID／IMSI、電話號碼——畫面上預設遮蔽，點一下眼睛圖示即可顯示。"
+      }
+    },
+    {
+      "h": {
+        "en": "Trust-flow handling",
+        "fr": "Gestion du flux de confiance",
+        "zh": "信任流程處理"
+      },
+      "p": {
+        "en": "A dedicated UI state while waiting for \"Trust This Computer\" — also handles denied trust and a locked device.",
+        "fr": "Un état d'interface dédié pendant l'attente de « Se fier à cet ordinateur » — gère aussi le refus et l'appareil verrouillé.",
+        "zh": "在等待「信任這台電腦」時提供專屬的介面狀態——也會處理拒絕信任與裝置已鎖定的情況。"
+      }
+    },
+    {
+      "h": {
+        "en": "Guided setup",
+        "fr": "Installation guidée",
+        "zh": "引導式設定"
+      },
+      "p": {
+        "en": "Missing <code>libimobiledevice</code>? The app tells you and gives you the exact <code>brew install</code> command.",
+        "fr": "<code>libimobiledevice</code> absent ? L'app vous le dit et vous donne la commande <code>brew install</code> exacte.",
+        "zh": "少了 <code>libimobiledevice</code>？應用程式會告訴你，並直接給出正確的 <code>brew install</code> 指令。"
+      }
+    }
+  ],
+  "chapters": [
+    {
+      "id": "privacy",
+      "h": {
+        "en": "Everything stays on your Mac",
+        "fr": "Tout reste sur votre Mac",
+        "zh": "一切都留在你的 Mac 上"
+      },
+      "blocks": [
+        {
+          "type": "p",
+          "t": {
+            "en": "iPhoneStatus only talks to your own iPhone over USB via <code>libimobiledevice</code> — no network requests, no analytics, no backend. Sensitive cellular identifiers are masked by default; you choose when to reveal them.",
+            "fr": "iPhoneStatus ne parle qu'à votre propre iPhone, en USB, via <code>libimobiledevice</code> — aucune requête réseau, aucune analytique, aucun backend. Les identifiants cellulaires sensibles sont masqués par défaut ; c'est vous qui décidez de les révéler.",
+            "zh": "iPhoneStatus 只透過 <code>libimobiledevice</code> 以 USB 與你自己的 iPhone 溝通——沒有網路請求、沒有分析追蹤、沒有後端。敏感的行動網路識別碼預設遮蔽，何時顯示由你決定。"
+          }
+        }
+      ]
+    },
+    {
+      "id": "install",
+      "h": {
+        "en": "Up and running in a minute",
+        "fr": "Opérationnel en une minute",
+        "zh": "一分鐘內開始使用"
+      },
+      "p": {
+        "en": "Notarized by Apple — it launches by double-click, no configuration needed.",
+        "fr": "Notariée par Apple — elle se lance d'un double-clic, sans configuration.",
+        "zh": "已通過 Apple 公證——按兩下即可啟動，不需任何設定。"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "<b>Download.</b> Grab the latest signed <code>.dmg</code> from GitHub Releases and open it.",
+              "fr": "<b>Télécharger.</b> Récupérez le dernier <code>.dmg</code> signé depuis GitHub Releases et ouvrez-le.",
+              "zh": "<b>下載。</b> 從 GitHub Releases 取得最新的已簽章 <code>.dmg</code> 並開啟。"
+            },
+            {
+              "en": "<b>Install.</b> Drag <code>iPhoneStatus.app</code> into <code>/Applications</code>.",
+              "fr": "<b>Installer.</b> Glissez <code>iPhoneStatus.app</code> dans <code>/Applications</code>.",
+              "zh": "<b>安裝。</b> 將 <code>iPhoneStatus.app</code> 拖入 <code>/Applications</code>。"
+            },
+            {
+              "en": "<b>Plug in your iPhone.</b> Connect over USB and accept \"Trust This Computer\" — that's it.",
+              "fr": "<b>Branchez votre iPhone.</b> Branchez en USB et acceptez « Se fier à cet ordinateur » — c'est tout.",
+              "zh": "<b>接上你的 iPhone。</b> 以 USB 連接並接受「信任這台電腦」——就這樣。"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "close": {
+    "h": {
+      "en": "See your iPhone's real status",
+      "fr": "Voyez le vrai statut de votre iPhone",
+      "zh": "看看你 iPhone 的真實狀態"
+    },
+    "p": {
+      "en": "Free, open-source and local-only. macOS 14 Sonoma or later.",
+      "fr": "Gratuite, open source et 100 % locale. macOS 14 Sonoma ou ultérieur.",
+      "zh": "免費、開源、純本機運作。macOS 14 Sonoma 或以上版本。"
+    },
+    "actions": [
+      {
+        "primary": true,
+        "href": "https://github.com/vincentlauriat/iPhoneStatus/releases/latest",
+        "label": {
+          "en": "Download for macOS",
+          "fr": "Télécharger pour macOS",
+          "zh": "下載 macOS 版"
+        }
+      },
+      {
+        "href": "https://github.com/vincentlauriat/iPhoneStatus#readme",
+        "label": {
+          "en": "Read the docs",
+          "fr": "Lire la doc",
+          "zh": "閱讀說明文件"
+        }
+      }
+    ]
+  },
+  "colophon": {
+    "notes": [
+      {
+        "en": "Also at <a href=\"https://lauriat.fr/outils/iphonestatus/\">lauriat.fr</a>.",
+        "fr": "Aussi sur <a href=\"https://lauriat.fr/outils/iphonestatus/\">lauriat.fr</a>.",
+        "zh": "另見 <a href=\"https://lauriat.fr/outils/iphonestatus/\">lauriat.fr</a>。"
+      }
+    ]
+  }
+}
